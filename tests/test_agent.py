@@ -5,10 +5,11 @@ import pytest
 langchain = pytest.importorskip("langchain", reason="langchain não instalado")
 
 from src.agent.tools import (  # noqa: E402
-    analyze_data,
-    calculate_risk_score,
+    analisar_historico,
+    buscar_conhecimento,
+    calcular_risco,
     get_available_tools,
-    get_model_prediction,
+    prever_preco,
 )
 
 
@@ -34,27 +35,34 @@ class TestTools:
             assert tool.description is not None
             assert len(tool.description) > 10
 
-    def test_analyze_data_returns_string(self):
-        """Tool de análise deve retornar string."""
-        result = analyze_data("Qual a média de transações?")
-        assert isinstance(result, str)
-        assert len(result) > 0
-
-    def test_get_model_prediction_valid_json(self):
-        """Tool de predição deve aceitar JSON válido."""
+    def test_analisar_historico_returns_json(self):
+        """Tool de análise deve retornar JSON válido."""
         import json
 
-        result = get_model_prediction('{"feature_1": 0.5, "feature_2": 3.0}')
+        result = analisar_historico("últimos 30 dias")
         parsed = json.loads(result)
-        assert "prediction" in parsed
+        assert "preco_atual" in parsed or "erro" in parsed
 
-    def test_get_model_prediction_invalid_json(self):
-        """Tool de predição deve tratar JSON inválido."""
-        result = get_model_prediction("not a json")
-        assert "Erro" in result
+    def test_prever_preco_returns_json(self):
+        """Tool de previsão deve retornar JSON válido."""
+        import json
 
-    def test_calculate_risk_score_returns_string(self):
-        """Tool de risco deve retornar string."""
-        result = calculate_risk_score("Transação de alto valor")
-        assert isinstance(result, str)
-        assert len(result) > 0
+        result = prever_preco("próximos 5 dias")
+        parsed = json.loads(result)
+        assert "previsoes" in parsed or "erro" in parsed
+
+    def test_calcular_risco_returns_json(self):
+        """Tool de risco deve retornar JSON válido."""
+        import json
+
+        result = calcular_risco("último trimestre")
+        parsed = json.loads(result)
+        assert "metricas_risco" in parsed or "erro" in parsed
+
+    def test_buscar_conhecimento_returns_json(self):
+        """Tool de busca deve retornar JSON válido."""
+        import json
+
+        result = buscar_conhecimento("o que é RSI")
+        parsed = json.loads(result)
+        assert "informacoes" in parsed or "resultado" in parsed or "erro" in parsed

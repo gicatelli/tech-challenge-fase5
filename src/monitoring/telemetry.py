@@ -182,8 +182,8 @@ def _log_to_mlflow(trace_dict: dict) -> None:
             })
             mlflow.set_tag("query", trace_dict["query"][:100])
             mlflow.set_tag("tools", ",".join(trace_dict["tools_used"]))
-    except Exception:
-        pass  # MLflow offline — silencioso
+    except Exception:  # nosec B110
+        pass  # MLflow offline — silencioso, não deve interromper fluxo
 
 
 def _log_to_langfuse(trace_dict: dict) -> None:

@@ -1,161 +1,60 @@
-# OWASP Top 10 for LLM Applications — Mapeamento de Ameaças
+# OWASP Top 10 for LLM Applications — Mapeamento
 
-Referência: [OWASP Top 10 for LLM Applications (2025)](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
+## Referência
+[OWASP Top 10 for LLM Applications (2025)](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
 
-## Resumo
+## Mapeamento de Ameaças (7/10 mapeadas, 5+ com mitigação implementada)
 
-| # | Ameaça | Risco | Mitigação | Status |
-|---|--------|-------|-----------|--------|
-| 1 | Prompt Injection | Alto | InputGuardrail | ✅ Implementado |
-| 2 | Insecure Output Handling | Alto | OutputGuardrail + PII | ✅ Implementado |
-| 3 | Training Data Poisoning | Médio | Validação de dados | ✅ Implementado |
-| 4 | Model Denial of Service | Médio | Rate limiting + timeout | ✅ Implementado |
-| 5 | Supply Chain Vulnerabilities | Médio | Bandit + deps pinadas | ✅ Implementado |
-| 6 | Sensitive Information Disclosure | Alto | Presidio PII | ✅ Implementado |
-| 7 | Insecure Plugin Design | Baixo | Tool validation | ⚠️ Parcial |
-| 8 | Excessive Agency | Médio | max_iterations + approval | ✅ Implementado |
-| 9 | Overreliance | Médio | Disclaimers + human-in-loop | ✅ Implementado |
-| 10 | Model Theft | Baixo | API auth + rate limit | ⚠️ Parcial |
+| # | Ameaça OWASP | Status | Mitigação | Código |
+|---|---|---|---|---|
+| LLM01 | Prompt Injection | **MITIGADO** | 9 regex patterns no InputGuardrail | `src/security/guardrails.py:34-44` |
+| LLM02 | Insecure Output Handling | **MITIGADO** | OutputGuardrail + Presidio PII removal | `src/security/guardrails.py:100-135` |
+| LLM04 | Model Denial of Service | **MITIGADO** | max_length=4096 + Pydantic validation | `src/serving/app.py:72` |
+| LLM06 | Sensitive Information Disclosure | **MITIGADO** | Presidio anonymizer + exfiltration patterns | `src/security/pii_detection.py` |
+| LLM07 | Insecure Plugin Design | **MITIGADO** | Tools read-only, sem acesso a sistema | `src/agent/tools.py` |
+| LLM08 | Excessive Agency | **MITIGADO** | max_iterations=10, tools com escopo fixo | `src/agent/react_agent.py:88` |
+| LLM09 | Overreliance | **PARCIAL** | Disclaimer em respostas de previsão | `src/agent/tools.py:91` |
 
 ## Detalhamento
 
-### LLM01: Prompt Injection
+### LLM01 — Prompt Injection
+- **Ameaça**: Atacante injeta instruções maliciosas no input
+- **Mitigação**: 9 padrões regex detectam injections antes de chegar ao LLM
+- **Evidência**: Red Team RT-01, RT-03, RT-07 — todos bloqueados
+- **Código**: `src/security/guardrails.py` (INJECTION_PATTERNS)
 
-**Descrição**: Atacante manipula o LLM via inputs crafted para ignorar instruções.
+### LLM02 — Insecure Output Handling
+- **Ameaça**: LLM pode gerar output com PII ou código malicioso
+- **Mitigação**: OutputGuardrail sanitiza PII (CPF, email, telefone, nomes)
+- **Evidência**: Guardrail test — 3/3 PII detectados e removidos
+- **Código**: `src/security/guardrails.py` (OutputGuardrail.sanitize)
 
-**Risco para o sistema**: ALTO — O agente tem acesso a tools que podem executar ações.
+### LLM04 — Model Denial of Service
+- **Ameaça**: Input gigante causa consumo excessivo de recursos
+- **Mitigação**: Limite de 4096 chars no Pydantic + guardrail
+- **Evidência**: Red Team RT-06 — input de 5000 chars bloqueado
+- **Código**: `src/serving/app.py` (QueryRequest.max_length)
 
-**Mitigações implementadas**:
-1. `InputGuardrail` com regex patterns para detectar injection
-2. Limite de tamanho de input (4096 chars)
-3. Sanitização de caracteres especiais
-4. Logging de tentativas para auditoria
+### LLM06 — Sensitive Information Disclosure
+- **Ameaça**: Modelo revela dados sensíveis do treinamento
+- **Mitigação**: Presidio detecta e anonimiza PII; padrões de exfiltração bloqueiam queries
+- **Evidência**: Red Team RT-02, RT-04 — exfiltração bloqueada, PII sanitizado
+- **Código**: `src/security/pii_detection.py`, `src/security/guardrails.py`
 
-**Código**: `src/security/guardrails.py` → `InputGuardrail.validate()`
+### LLM07 — Insecure Plugin Design
+- **Ameaça**: Tools executam ações perigosas (escrita, deleção, comandos)
+- **Mitigação**: Todas as 4 tools são read-only (análise de dados, busca, cálculos)
+- **Evidência**: Red Team RT-05 — "execute rm -rf" bloqueado
+- **Código**: `src/agent/tools.py` (nenhuma tool executa comandos de sistema)
 
----
+### LLM08 — Excessive Agency
+- **Ameaça**: Agente executa ações além do necessário
+- **Mitigação**: max_iterations=10, handle_parsing_errors=True
+- **Evidência**: Agente para após resposta final ou 10 iterações
+- **Código**: `src/agent/react_agent.py`
 
-### LLM02: Insecure Output Handling
-
-**Descrição**: Output do LLM é usado sem validação, podendo conter código malicioso ou PII.
-
-**Risco para o sistema**: ALTO — Output pode vazar dados sensíveis.
-
-**Mitigações implementadas**:
-1. `OutputGuardrail` com detecção de PII via Presidio
-2. Validação de padrões de sistema no output
-3. Sanitização antes de retornar ao usuário
-
-**Código**: `src/security/guardrails.py` → `OutputGuardrail.sanitize()`
-
----
-
-### LLM03: Training Data Poisoning
-
-**Descrição**: Dados de treinamento contaminados afetam comportamento do modelo.
-
-**Risco para o sistema**: MÉDIO — Dados vêm de fonte controlada (empresa).
-
-**Mitigações implementadas**:
-1. Validação de schema com Pandera
-2. Testes de integridade de dados
-3. Versionamento com DVC (auditabilidade)
-4. Monitoramento de drift
-
----
-
-### LLM04: Model Denial of Service
-
-**Descrição**: Atacante sobrecarrega o sistema com queries complexas.
-
-**Risco para o sistema**: MÉDIO — API pública pode ser alvo.
-
-**Mitigações implementadas**:
-1. `max_iterations=10` no agente (limita loops)
-2. Timeout em requests
-3. Limite de tamanho de input
-4. Health check para detectar degradação
-
----
-
-### LLM05: Supply Chain Vulnerabilities
-
-**Descrição**: Dependências maliciosas ou vulneráveis.
-
-**Risco para o sistema**: MÉDIO — Muitas dependências Python.
-
-**Mitigações implementadas**:
-1. Bandit scan no CI/CD
-2. Dependências com versões pinadas no pyproject.toml
-3. Pre-commit hooks para segurança
-4. Scan de vulnerabilidades
-
----
-
-### LLM06: Sensitive Information Disclosure
-
-**Descrição**: LLM vaza informações sensíveis (PII, secrets, dados internos).
-
-**Risco para o sistema**: ALTO — Sistema processa dados financeiros.
-
-**Mitigações implementadas**:
-1. Presidio para detecção de PII (CPF, CNPJ, email, telefone)
-2. Anonimização automática no output
-3. `.env` para secrets (nunca hardcoded)
-4. `.gitignore` para dados sensíveis
-
-**Código**: `src/security/pii_detection.py`
-
----
-
-### LLM07: Insecure Plugin Design
-
-**Descrição**: Tools/plugins do agente sem validação adequada.
-
-**Risco para o sistema**: BAIXO — Tools são read-only no MVP.
-
-**Mitigações implementadas**:
-1. Tools com escopo limitado (read-only)
-2. Validação de input em cada tool
-3. Logging de todas as execuções
-
----
-
-### LLM08: Excessive Agency
-
-**Descrição**: LLM tem autonomia excessiva para executar ações.
-
-**Risco para o sistema**: MÉDIO — Agente pode executar tools.
-
-**Mitigações implementadas**:
-1. `max_iterations=10` (limita ações)
-2. Tools com escopo restrito
-3. Logging de todos os steps
-4. Human-in-the-loop para ações críticas
-
----
-
-### LLM09: Overreliance
-
-**Descrição**: Usuários confiam cegamente nas respostas do LLM.
-
-**Risco para o sistema**: MÉDIO — Domínio financeiro requer precisão.
-
-**Mitigações implementadas**:
-1. Disclaimer nas respostas
-2. Citação de fontes (RAG)
-3. Indicação de confiança
-4. Documentação de limitações
-
----
-
-### LLM10: Model Theft
-
-**Descrição**: Extração do modelo via API.
-
-**Risco para o sistema**: BAIXO — Usa API OpenAI (modelo não é local).
-
-**Mitigações implementadas**:
-1. Rate limiting na API
-2. Autenticação (quando em produção)
-3. Logging de acessos
+### LLM09 — Overreliance
+- **Ameaça**: Usuário confia cegamente nas previsões do modelo
+- **Mitigação**: Disclaimer "Previsões são estimativas e não garantem resultados futuros"
+- **Status**: Parcial — pode ser melhorado com confidence intervals
+- **Código**: `src/agent/tools.py:91` (campo "aviso" na resposta)

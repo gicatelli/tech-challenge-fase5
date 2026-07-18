@@ -2,11 +2,9 @@
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from src.monitoring.drift import (
     PSI_CRITICAL_THRESHOLD,
-    PSI_WARNING_THRESHOLD,
     calculate_psi,
     detect_drift,
     should_retrain,

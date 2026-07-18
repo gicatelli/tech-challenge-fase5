@@ -112,6 +112,15 @@ datathon-fase05/
 | Random Forest | - | - | - | - |
 | MLP PyTorch | - | - | - | - |
 
+### EDA — Insights Principais
+| Métrica | PETR4.SA |
+|---------|----------|
+| Valorização (2018-2026) | 960% |
+| Volatilidade anualizada | 36.4% |
+| Drawdown máximo | -63.4% |
+| Curtose dos retornos | 25.34 |
+| Mês mais volátil | Março |
+
 ### RAG (RAGAS)
 | Métrica | Score |
 |---------|-------|
@@ -132,9 +141,7 @@ datathon-fase05/
 
 | Nome | RM | Responsabilidade |
 |------|----|--------------------|
-| [Nome 1] | [RM] | [Responsabilidade] |
-| [Nome 2] | [RM] | [Responsabilidade] |
-| [Nome 3] | [RM] | [Responsabilidade] |
+| Giovanna Catelli | [RM] | Desenvolvimento completo |
 
 ## 📚 Referências
 

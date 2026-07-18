@@ -31,6 +31,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from src.features.feature_engineering import compute_features, prepare_sequences
 from src.models.hyperparameter_tuning import train_lstm_model
+from src.models.registry import register_and_promote
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -360,6 +361,23 @@ def run_training_pipeline(
     with open(metrics_file, "w") as f:
         json.dump(comparison, f, indent=2)
     logger.info("Métricas salvas em %s", metrics_file)
+
+    # Registrar champion no Model Registry
+    champion_run_id = (
+        lstm_run_id if comparison["champion"] == "lstm" else rf_run_id
+    )
+    try:
+        version = register_and_promote(
+            run_id=champion_run_id,
+            model_name="lstm-petr4-predictor" if comparison["champion"] == "lstm"
+            else "rf-petr4-predictor",
+            model_version="1.0.0",
+        )
+        comparison["registry_version"] = version
+        logger.info("Champion registrado no Model Registry: v%s", version)
+    except Exception as e:
+        logger.warning("Registro no Model Registry falhou (MLflow offline?): %s", e)
+        comparison["registry_version"] = "not_registered"
 
     # Log resumo
     print("\n" + "=" * 70)

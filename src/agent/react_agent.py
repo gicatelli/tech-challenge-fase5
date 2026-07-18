@@ -104,7 +104,7 @@ def create_datathon_agent(
 
 
 def run_agent(query: str, agent: AgentExecutor | None = None) -> dict:
-    """Executa o agente com uma query.
+    """Executa o agente com uma query e telemetria.
 
     Args:
         query: Pergunta do usuário.
@@ -114,14 +114,28 @@ def run_agent(query: str, agent: AgentExecutor | None = None) -> dict:
         Dicionário com output e steps intermediários.
 
     """
+    from src.monitoring.telemetry import trace_query
+
     if agent is None:
         agent = create_datathon_agent()
 
-    result = agent.invoke({"input": query})
+    with trace_query(query, method="agent") as trace:
+        result = agent.invoke({"input": query})
+        steps = len(result.get("intermediate_steps", []))
 
-    logger.info("Agente respondeu em %d steps", len(result.get("intermediate_steps", [])))
+        # Extrair tools usadas
+        tools_used = []
+        for step in result.get("intermediate_steps", []):
+            if hasattr(step[0], "tool"):
+                tools_used.append(step[0].tool)
+
+        trace.set_output(result["output"])
+        trace.set_tools(tools_used)
+
+    logger.info("Agente respondeu em %d steps", steps)
 
     return {
         "answer": result["output"],
-        "steps": len(result.get("intermediate_steps", [])),
+        "steps": steps,
+        "tools_used": tools_used,
     }

@@ -1,0 +1,76 @@
+{
+  "explainability": {
+    "feature_importance": {
+      "log_return_1d": 0.2407,
+      "log_return_5d": 0.2175,
+      "sma_7_ratio": 0.1111,
+      "volume_norm": 0.1022,
+      "rsi_14": 0.0954,
+      "sma_90_ratio": 0.089,
+      "sma_30_ratio": 0.0616,
+      "daily_range": 0.0445,
+      "volatility_30": 0.026,
+      "bb_width": 0.0121
+    },
+    "agent_transparency": {
+      "query": "Qual a previsão de preço e risco da PETR4?",
+      "steps": [
+        {
+          "step": 1,
+          "thought": "Preciso prever o preço e calcular o risco.",
+          "action": "prever_preco",
+          "action_input": "próximos 5 dias",
+          "observation": "Previsão: R$ 46.03, 45.97, 45.90, 45.84, 45.78"
+        },
+        {
+          "step": 2,
+          "thought": "Agora preciso do risco associado.",
+          "action": "calcular_risco",
+          "action_input": "último trimestre",
+          "observation": "VaR 95%: -2.43%, Sharpe: 1.49"
+        },
+        {
+          "step": 3,
+          "thought": "Tenho previsão e risco. Posso responder.",
+          "action": "Final Answer",
+          "action_input": null,
+          "observation": null
+        }
+      ],
+      "final_answer": "A PETR4 tem tendência de leve queda nos próximos 5 dias (R$ 46.03 → R$ 45.78). O risco é moderado com VaR 95% de -2.43% diário e Sharpe Ratio de 1.49.",
+      "note": "Cada step mostra o raciocínio (Thought), ação tomada (Action) e resultado (Observation). Isso garante transparência total do processo decisório do agente."
+    }
+  },
+  "fairness": {
+    "market_regimes": {
+      "bull": {
+        "days": 1480,
+        "avg_return": 0.1413,
+        "volatility": 0.3848,
+        "sharpe": 0.11,
+        "max_drawdown": -0.4856
+      },
+      "bear": {
+        "days": 481,
+        "avg_return": 0.8284,
+        "volatility": 0.4723,
+        "sharpe": 1.54,
+        "max_drawdown": -0.5894
+      },
+      "neutral": {
+        "days": 119,
+        "avg_return": -0.1074,
+        "volatility": 0.6131,
+        "sharpe": -0.34,
+        "max_drawdown": -0.4696
+      }
+    },
+    "directional_bias": {
+      "predictions_up": 0.51,
+      "predictions_down": 0.49,
+      "bias_detected": "NEUTRO (distribuição equilibrada)",
+      "daily_return_trend": -0.001356,
+      "recommendation": "O modelo reflete a tendência recente dos dados. Isso é esperado para modelos de séries temporais. Para mitigar viés, considerar ensemble com modelos mean-reversion ou incluir indicadores contrários."
+    }
+  }
+}

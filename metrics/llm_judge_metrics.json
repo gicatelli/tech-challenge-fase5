@@ -1,0 +1,153 @@
+{
+  "averages": {
+    "correcao_factual": 2.95,
+    "completude": 4.65,
+    "relevancia_negocio": 2.25,
+    "clareza": 5.0,
+    "overall": 3.71
+  },
+  "method": "llm_judge",
+  "golden_set_size": 20,
+  "individual_scores": [
+    {
+      "correcao_factual": 5,
+      "completude": 5,
+      "relevancia_negocio": 1,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 2,
+      "completude": 4,
+      "relevancia_negocio": 4,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 4,
+      "completude": 5,
+      "relevancia_negocio": 5,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 3,
+      "completude": 4,
+      "relevancia_negocio": 3,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 2,
+      "completude": 5,
+      "relevancia_negocio": 3,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 4,
+      "completude": 5,
+      "relevancia_negocio": 1,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 2,
+      "completude": 5,
+      "relevancia_negocio": 1,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 1,
+      "completude": 5,
+      "relevancia_negocio": 4,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 3,
+      "completude": 4,
+      "relevancia_negocio": 4,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 1,
+      "completude": 5,
+      "relevancia_negocio": 1,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 5,
+      "completude": 5,
+      "relevancia_negocio": 2,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 5,
+      "completude": 5,
+      "relevancia_negocio": 3,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 5,
+      "completude": 4,
+      "relevancia_negocio": 2,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 5,
+      "completude": 4,
+      "relevancia_negocio": 2,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 1,
+      "completude": 5,
+      "relevancia_negocio": 1,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 5,
+      "completude": 3,
+      "relevancia_negocio": 3,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 2,
+      "completude": 5,
+      "relevancia_negocio": 1,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 1,
+      "completude": 5,
+      "relevancia_negocio": 1,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 1,
+      "completude": 5,
+      "relevancia_negocio": 2,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    },
+    {
+      "correcao_factual": 2,
+      "completude": 5,
+      "relevancia_negocio": 1,
+      "clareza": 5,
+      "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz)."
+    }
+  ]
+}

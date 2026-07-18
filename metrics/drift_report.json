@@ -1,0 +1,15 @@
+{
+  "status": "critical",
+  "action": "retrain",
+  "drift_share": 0.0,
+  "max_psi": 1.1392006735109803,
+  "psi_by_feature": {
+    "rsi_14": 0.10929637778697048,
+    "log_return": 0.0701889212998923,
+    "volatility_30": 1.1392006735109803,
+    "volume_norm": 0.06248563748661863,
+    "price_sma30_ratio": 0.0510526537417282
+  },
+  "threshold_warning": 0.1,
+  "threshold_critical": 0.2
+}

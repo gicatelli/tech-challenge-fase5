@@ -171,8 +171,14 @@ def rag_query(query: str, top_k: int = 3) -> tuple[str, list[str]]:
         Tupla (resposta, contextos utilizados).
 
     """
-    contexts = retrieve_context(query, top_k=top_k)
-    answer = generate_answer(query, contexts)
+    from src.monitoring.telemetry import trace_query
+
+    with trace_query(query, method="rag") as trace:
+        contexts = retrieve_context(query, top_k=top_k)
+        trace.set_contexts(len(contexts))
+
+        answer = generate_answer(query, contexts)
+        trace.set_output(answer)
 
     logger.info("RAG query completa: %d contextos usados", len(contexts))
     return answer, contexts

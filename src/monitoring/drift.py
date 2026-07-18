@@ -157,4 +157,4 @@ def should_retrain(drift_result: dict[str, Any]) -> bool:
         True se retrain é necessário.
 
     """
-    return drift_result["action"] == "retrain"
+    return drift_result["action"] == "retrain"  # type: ignore[no-any-return]

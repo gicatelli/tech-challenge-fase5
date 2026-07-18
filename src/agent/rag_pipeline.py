@@ -153,7 +153,7 @@ Pergunta: {query}
 Resposta:"""
 
     response = llm.invoke(prompt)
-    return response.content
+    return response.content  # type: ignore[return-value]
 
 
 def rag_query(query: str, top_k: int = 3) -> tuple[str, list[str]]:

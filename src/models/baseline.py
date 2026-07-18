@@ -134,7 +134,7 @@ class MLPClassifier(nn.Module):
             Probabilidades de classe positiva.
 
         """
-        return self.network(x)
+        return self.network(x)  # type: ignore[no-any-return]
 
 
 def train_mlp(

@@ -101,7 +101,7 @@ def train_and_log(
             metrics["f1"],
         )
 
-        return run.info.run_id
+        return run.info.run_id  # type: ignore[no-any-return]
 
 
 if __name__ == "__main__":

@@ -132,7 +132,7 @@ async def query_agent(request: QueryRequest):
             agent = get_agent()
             result = run_agent(request.query, agent)
             answer = result["answer"]
-            contexts = []
+            contexts: list[str] = []
             steps = result["steps"]
         else:
             answer, contexts = rag_query(request.query)

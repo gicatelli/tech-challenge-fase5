@@ -8,7 +8,7 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from langchain.agents import AgentExecutor, create_react_agent
+from langchain.agents import AgentExecutor, create_react_agent  # type: ignore[attr-defined]
 from langchain.prompts import PromptTemplate
 from langchain_core.tools import Tool
 from langchain_openai import ChatOpenAI

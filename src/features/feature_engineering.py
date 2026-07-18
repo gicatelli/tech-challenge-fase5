@@ -6,6 +6,7 @@ de schema (pandera) para garantir qualidade dos dados.
 
 import logging
 
+import numpy as np
 import pandas as pd
 import pandera as pa
 from pandera import Column, DataFrameSchema
@@ -60,7 +61,7 @@ def compute_features(df: pd.DataFrame, validate: bool = True) -> pd.DataFrame:
 
     # Transformações não-lineares
     result["feature_1_squared"] = result["feature_1"] ** 2
-    result["feature_2_log"] = pd.np.log1p(result["feature_2"])
+    result["feature_2_log"] = np.log1p(result["feature_2"])
 
     # Preencher nulls (se houver) com mediana
     numeric_cols = result.select_dtypes(include=["float64", "int64"]).columns

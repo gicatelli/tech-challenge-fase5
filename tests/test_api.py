@@ -45,13 +45,13 @@ class TestQueryEndpoint:
         )
         assert response.status_code == 400
 
-    def test_too_long_query_returns_400(self):
-        """Query muito longa deve retornar 400."""
+    def test_too_long_query_returns_error(self):
+        """Query muito longa deve retornar 422 (validação do Pydantic max_length)."""
         response = client.post(
             "/query",
             json={"query": "a" * 5000},
         )
-        assert response.status_code == 400
+        assert response.status_code == 422
 
 
 class TestMetricsEndpoint:

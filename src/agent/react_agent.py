@@ -10,7 +10,7 @@ import os
 from dotenv import load_dotenv
 from langchain.agents import AgentExecutor, create_react_agent  # type: ignore[attr-defined]
 from langchain.prompts import PromptTemplate
-from langchain.tools import Tool  # type: ignore[attr-defined]
+from langchain.tools import Tool
 from langchain_openai import ChatOpenAI
 
 from src.agent.tools import get_available_tools

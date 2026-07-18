@@ -169,4 +169,5 @@ async def metrics():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Bind em 0.0.0.0 é intencional para acesso dentro do container Docker
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # nosec B104

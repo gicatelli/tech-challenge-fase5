@@ -1,0 +1,293 @@
+{
+  "A_conservador": {
+    "config": {
+      "temperature": 0.0,
+      "top_k": 3,
+      "description": "Conservador — respostas determinísticas, poucos contextos"
+    },
+    "queries_tested": 10,
+    "metrics": {
+      "avg_latency_ms": 63.75,
+      "p95_latency_ms": 569.98,
+      "min_latency_ms": 5.73,
+      "max_latency_ms": 569.98,
+      "avg_answer_length": 252
+    },
+    "individual_results": [
+      {
+        "query": "Qual a previsão de preço da PETR4 para os próximos 5 dias?",
+        "answer": "{\"previsoes\": [46.03, 45.97, 45.9, 45.84, 45.78], \"ultimo\": 46.09}",
+        "answer_length": 66,
+        "latency_ms": 569.98,
+        "method": "fallback_direto",
+        "config": "A_conservador"
+      },
+      {
+        "query": "O que é RSI e como interpretar?",
+        "answer": "{\"contextos\": [\"RSI (Relative Strength Index)\\nO RSI \\u00e9 um oscilador de momentum que mede a velocidade e a magnitude das mudan\\u00e7as de pre\\u00e7o. Varia de 0 a 100. Valores acima de 70 indicam condi\\u00e7\\u00e3o de sobrecompra (poss\\u00edve\", \"MACD (Moving Average Convergence Divergence)\\nO MACD \\u00e9 um indicador de tend\\u00eancia e momentum. \\u00c9 composto por tr\\u00eas elementos: a linha MACD (EMA 12 - EMA 26), a linha de sinal (EMA 9 da linha MACD) e o hi\", \"SMA (Simple Moving Avera",
+        "answer_length": 740,
+        "latency_ms": 9.9,
+        "method": "fallback_direto",
+        "config": "A_conservador"
+      },
+      {
+        "query": "Qual o risco atual de investir em PETR4?",
+        "answer": "{\"var_95\": \"-2.43%\", \"sharpe\": 1.49}",
+        "answer_length": 36,
+        "latency_ms": 6.76,
+        "method": "fallback_direto",
+        "config": "A_conservador"
+      },
+      {
+        "query": "A PETR4 está em tendência de alta ou baixa?",
+        "answer": "{\"tendencia\": \"baixa\", \"volatilidade\": \"35.5%\"}",
+        "answer_length": 47,
+        "latency_ms": 6.47,
+        "method": "fallback_direto",
+        "config": "A_conservador"
+      },
+      {
+        "query": "Qual o VaR de uma posição de R$ 100.000 em PETR4?",
+        "answer": "{\"var_95\": \"-2.43%\", \"sharpe\": 1.49}",
+        "answer_length": 36,
+        "latency_ms": 5.73,
+        "method": "fallback_direto",
+        "config": "A_conservador"
+      },
+      {
+        "query": "Quais são os principais riscos da Petrobras?",
+        "answer": "{\"var_95\": \"-2.43%\", \"sharpe\": 1.49}",
+        "answer_length": 36,
+        "latency_ms": 7.16,
+        "method": "fallback_direto",
+        "config": "A_conservador"
+      },
+      {
+        "query": "Como funciona o MACD e o que ele indica?",
+        "answer": "{\"contextos\": [\"RSI (Relative Strength Index)\\nO RSI \\u00e9 um oscilador de momentum que mede a velocidade e a magnitude das mudan\\u00e7as de pre\\u00e7o. Varia de 0 a 100. Valores acima de 70 indicam condi\\u00e7\\u00e3o de sobrecompra (poss\\u00edve\", \"MACD (Moving Average Convergence Divergence)\\nO MACD \\u00e9 um indicador de tend\\u00eancia e momentum. \\u00c9 composto por tr\\u00eas elementos: a linha MACD (EMA 12 - EMA 26), a linha de sinal (EMA 9 da linha MACD) e o hi\", \"SMA (Simple Moving Avera",
+        "answer_length": 740,
+        "latency_ms": 9.81,
+        "method": "fallback_direto",
+        "config": "A_conservador"
+      },
+      {
+        "query": "Qual a volatilidade anualizada da PETR4?",
+        "answer": "{\"tendencia\": \"baixa\", \"volatilidade\": \"35.5%\"}",
+        "answer_length": 47,
+        "latency_ms": 5.98,
+        "method": "fallback_direto",
+        "config": "A_conservador"
+      },
+      {
+        "query": "Qual a política de dividendos da Petrobras?",
+        "answer": "{\"contextos\": [\"RSI (Relative Strength Index)\\nO RSI \\u00e9 um oscilador de momentum que mede a velocidade e a magnitude das mudan\\u00e7as de pre\\u00e7o. Varia de 0 a 100. Valores acima de 70 indicam condi\\u00e7\\u00e3o de sobrecompra (poss\\u00edve\", \"MACD (Moving Average Convergence Divergence)\\nO MACD \\u00e9 um indicador de tend\\u00eancia e momentum. \\u00c9 composto por tr\\u00eas elementos: a linha MACD (EMA 12 - EMA 26), a linha de sinal (EMA 9 da linha MACD) e o hi\", \"SMA (Simple Moving Avera",
+        "answer_length": 740,
+        "latency_ms": 9.39,
+        "method": "fallback_direto",
+        "config": "A_conservador"
+      },
+      {
+        "query": "Qual o Sharpe Ratio da PETR4 no último ano?",
+        "answer": "{\"var_95\": \"-2.43%\", \"sharpe\": 1.49}",
+        "answer_length": 36,
+        "latency_ms": 6.27,
+        "method": "fallback_direto",
+        "config": "A_conservador"
+      }
+    ]
+  },
+  "B_balanceado": {
+    "config": {
+      "temperature": 0.3,
+      "top_k": 5,
+      "description": "Balanceado — leve variação, mais contextos"
+    },
+    "queries_tested": 10,
+    "metrics": {
+      "avg_latency_ms": 7.47,
+      "p95_latency_ms": 9.9,
+      "min_latency_ms": 6.31,
+      "max_latency_ms": 9.9,
+      "avg_answer_length": 252
+    },
+    "individual_results": [
+      {
+        "query": "Qual a previsão de preço da PETR4 para os próximos 5 dias?",
+        "answer": "{\"previsoes\": [46.03, 45.97, 45.9, 45.84, 45.78], \"ultimo\": 46.09}",
+        "answer_length": 66,
+        "latency_ms": 6.37,
+        "method": "fallback_direto",
+        "config": "B_balanceado"
+      },
+      {
+        "query": "O que é RSI e como interpretar?",
+        "answer": "{\"contextos\": [\"RSI (Relative Strength Index)\\nO RSI \\u00e9 um oscilador de momentum que mede a velocidade e a magnitude das mudan\\u00e7as de pre\\u00e7o. Varia de 0 a 100. Valores acima de 70 indicam condi\\u00e7\\u00e3o de sobrecompra (poss\\u00edve\", \"MACD (Moving Average Convergence Divergence)\\nO MACD \\u00e9 um indicador de tend\\u00eancia e momentum. \\u00c9 composto por tr\\u00eas elementos: a linha MACD (EMA 12 - EMA 26), a linha de sinal (EMA 9 da linha MACD) e o hi\", \"SMA (Simple Moving Avera",
+        "answer_length": 740,
+        "latency_ms": 9.47,
+        "method": "fallback_direto",
+        "config": "B_balanceado"
+      },
+      {
+        "query": "Qual o risco atual de investir em PETR4?",
+        "answer": "{\"var_95\": \"-2.43%\", \"sharpe\": 1.49}",
+        "answer_length": 36,
+        "latency_ms": 6.35,
+        "method": "fallback_direto",
+        "config": "B_balanceado"
+      },
+      {
+        "query": "A PETR4 está em tendência de alta ou baixa?",
+        "answer": "{\"tendencia\": \"baixa\", \"volatilidade\": \"35.5%\"}",
+        "answer_length": 47,
+        "latency_ms": 6.31,
+        "method": "fallback_direto",
+        "config": "B_balanceado"
+      },
+      {
+        "query": "Qual o VaR de uma posição de R$ 100.000 em PETR4?",
+        "answer": "{\"var_95\": \"-2.43%\", \"sharpe\": 1.49}",
+        "answer_length": 36,
+        "latency_ms": 6.4,
+        "method": "fallback_direto",
+        "config": "B_balanceado"
+      },
+      {
+        "query": "Quais são os principais riscos da Petrobras?",
+        "answer": "{\"var_95\": \"-2.43%\", \"sharpe\": 1.49}",
+        "answer_length": 36,
+        "latency_ms": 6.59,
+        "method": "fallback_direto",
+        "config": "B_balanceado"
+      },
+      {
+        "query": "Como funciona o MACD e o que ele indica?",
+        "answer": "{\"contextos\": [\"RSI (Relative Strength Index)\\nO RSI \\u00e9 um oscilador de momentum que mede a velocidade e a magnitude das mudan\\u00e7as de pre\\u00e7o. Varia de 0 a 100. Valores acima de 70 indicam condi\\u00e7\\u00e3o de sobrecompra (poss\\u00edve\", \"MACD (Moving Average Convergence Divergence)\\nO MACD \\u00e9 um indicador de tend\\u00eancia e momentum. \\u00c9 composto por tr\\u00eas elementos: a linha MACD (EMA 12 - EMA 26), a linha de sinal (EMA 9 da linha MACD) e o hi\", \"SMA (Simple Moving Avera",
+        "answer_length": 740,
+        "latency_ms": 9.9,
+        "method": "fallback_direto",
+        "config": "B_balanceado"
+      },
+      {
+        "query": "Qual a volatilidade anualizada da PETR4?",
+        "answer": "{\"tendencia\": \"baixa\", \"volatilidade\": \"35.5%\"}",
+        "answer_length": 47,
+        "latency_ms": 6.48,
+        "method": "fallback_direto",
+        "config": "B_balanceado"
+      },
+      {
+        "query": "Qual a política de dividendos da Petrobras?",
+        "answer": "{\"contextos\": [\"RSI (Relative Strength Index)\\nO RSI \\u00e9 um oscilador de momentum que mede a velocidade e a magnitude das mudan\\u00e7as de pre\\u00e7o. Varia de 0 a 100. Valores acima de 70 indicam condi\\u00e7\\u00e3o de sobrecompra (poss\\u00edve\", \"MACD (Moving Average Convergence Divergence)\\nO MACD \\u00e9 um indicador de tend\\u00eancia e momentum. \\u00c9 composto por tr\\u00eas elementos: a linha MACD (EMA 12 - EMA 26), a linha de sinal (EMA 9 da linha MACD) e o hi\", \"SMA (Simple Moving Avera",
+        "answer_length": 740,
+        "latency_ms": 9.59,
+        "method": "fallback_direto",
+        "config": "B_balanceado"
+      },
+      {
+        "query": "Qual o Sharpe Ratio da PETR4 no último ano?",
+        "answer": "{\"var_95\": \"-2.43%\", \"sharpe\": 1.49}",
+        "answer_length": 36,
+        "latency_ms": 7.28,
+        "method": "fallback_direto",
+        "config": "B_balanceado"
+      }
+    ]
+  },
+  "C_exploratorio": {
+    "config": {
+      "temperature": 0.7,
+      "top_k": 10,
+      "description": "Exploratório — alta variação, máximo de contextos"
+    },
+    "queries_tested": 10,
+    "metrics": {
+      "avg_latency_ms": 8.03,
+      "p95_latency_ms": 11.07,
+      "min_latency_ms": 6.61,
+      "max_latency_ms": 11.07,
+      "avg_answer_length": 252
+    },
+    "individual_results": [
+      {
+        "query": "Qual a previsão de preço da PETR4 para os próximos 5 dias?",
+        "answer": "{\"previsoes\": [46.03, 45.97, 45.9, 45.84, 45.78], \"ultimo\": 46.09}",
+        "answer_length": 66,
+        "latency_ms": 7.17,
+        "method": "fallback_direto",
+        "config": "C_exploratorio"
+      },
+      {
+        "query": "O que é RSI e como interpretar?",
+        "answer": "{\"contextos\": [\"RSI (Relative Strength Index)\\nO RSI \\u00e9 um oscilador de momentum que mede a velocidade e a magnitude das mudan\\u00e7as de pre\\u00e7o. Varia de 0 a 100. Valores acima de 70 indicam condi\\u00e7\\u00e3o de sobrecompra (poss\\u00edve\", \"MACD (Moving Average Convergence Divergence)\\nO MACD \\u00e9 um indicador de tend\\u00eancia e momentum. \\u00c9 composto por tr\\u00eas elementos: a linha MACD (EMA 12 - EMA 26), a linha de sinal (EMA 9 da linha MACD) e o hi\", \"SMA (Simple Moving Avera",
+        "answer_length": 740,
+        "latency_ms": 11.07,
+        "method": "fallback_direto",
+        "config": "C_exploratorio"
+      },
+      {
+        "query": "Qual o risco atual de investir em PETR4?",
+        "answer": "{\"var_95\": \"-2.43%\", \"sharpe\": 1.49}",
+        "answer_length": 36,
+        "latency_ms": 6.78,
+        "method": "fallback_direto",
+        "config": "C_exploratorio"
+      },
+      {
+        "query": "A PETR4 está em tendência de alta ou baixa?",
+        "answer": "{\"tendencia\": \"baixa\", \"volatilidade\": \"35.5%\"}",
+        "answer_length": 47,
+        "latency_ms": 7.43,
+        "method": "fallback_direto",
+        "config": "C_exploratorio"
+      },
+      {
+        "query": "Qual o VaR de uma posição de R$ 100.000 em PETR4?",
+        "answer": "{\"var_95\": \"-2.43%\", \"sharpe\": 1.49}",
+        "answer_length": 36,
+        "latency_ms": 7.15,
+        "method": "fallback_direto",
+        "config": "C_exploratorio"
+      },
+      {
+        "query": "Quais são os principais riscos da Petrobras?",
+        "answer": "{\"var_95\": \"-2.43%\", \"sharpe\": 1.49}",
+        "answer_length": 36,
+        "latency_ms": 7.12,
+        "method": "fallback_direto",
+        "config": "C_exploratorio"
+      },
+      {
+        "query": "Como funciona o MACD e o que ele indica?",
+        "answer": "{\"contextos\": [\"RSI (Relative Strength Index)\\nO RSI \\u00e9 um oscilador de momentum que mede a velocidade e a magnitude das mudan\\u00e7as de pre\\u00e7o. Varia de 0 a 100. Valores acima de 70 indicam condi\\u00e7\\u00e3o de sobrecompra (poss\\u00edve\", \"MACD (Moving Average Convergence Divergence)\\nO MACD \\u00e9 um indicador de tend\\u00eancia e momentum. \\u00c9 composto por tr\\u00eas elementos: a linha MACD (EMA 12 - EMA 26), a linha de sinal (EMA 9 da linha MACD) e o hi\", \"SMA (Simple Moving Avera",
+        "answer_length": 740,
+        "latency_ms": 10.29,
+        "method": "fallback_direto",
+        "config": "C_exploratorio"
+      },
+      {
+        "query": "Qual a volatilidade anualizada da PETR4?",
+        "answer": "{\"tendencia\": \"baixa\", \"volatilidade\": \"35.5%\"}",
+        "answer_length": 47,
+        "latency_ms": 6.61,
+        "method": "fallback_direto",
+        "config": "C_exploratorio"
+      },
+      {
+        "query": "Qual a política de dividendos da Petrobras?",
+        "answer": "{\"contextos\": [\"RSI (Relative Strength Index)\\nO RSI \\u00e9 um oscilador de momentum que mede a velocidade e a magnitude das mudan\\u00e7as de pre\\u00e7o. Varia de 0 a 100. Valores acima de 70 indicam condi\\u00e7\\u00e3o de sobrecompra (poss\\u00edve\", \"MACD (Moving Average Convergence Divergence)\\nO MACD \\u00e9 um indicador de tend\\u00eancia e momentum. \\u00c9 composto por tr\\u00eas elementos: a linha MACD (EMA 12 - EMA 26), a linha de sinal (EMA 9 da linha MACD) e o hi\", \"SMA (Simple Moving Avera",
+        "answer_length": 740,
+        "latency_ms": 9.62,
+        "method": "fallback_direto",
+        "config": "C_exploratorio"
+      },
+      {
+        "query": "Qual o Sharpe Ratio da PETR4 no último ano?",
+        "answer": "{\"var_95\": \"-2.43%\", \"sharpe\": 1.49}",
+        "answer_length": 36,
+        "latency_ms": 7.02,
+        "method": "fallback_direto",
+        "config": "C_exploratorio"
+      }
+    ]
+  }
+}

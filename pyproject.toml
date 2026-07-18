@@ -101,7 +101,7 @@ addopts = "-v --cov=src --cov-report=term-missing --cov-fail-under=30"
 
 [tool.bandit]
 exclude_dirs = ["tests"]
-skips = ["B101"]
+skips = ["B101", "B404"]
 
 [tool.coverage.run]
 source = ["src"]

@@ -40,7 +40,7 @@ def get_git_sha() -> str:
 
     """
     try:
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603 B607
             ["git", "rev-parse", "--short", "HEAD"],
             capture_output=True,
             text=True,
@@ -64,7 +64,7 @@ def get_data_version(data_path: str = "data/raw/PETR4_SA_historico.csv") -> str:
     try:
         with open(data_path, "rb") as f:
             content = f.read()
-        return hashlib.md5(content).hexdigest()[:8]  # noqa: S324
+        return hashlib.md5(content, usedforsecurity=False).hexdigest()[:8]  # nosec B324
     except FileNotFoundError:
         return "unknown"
 

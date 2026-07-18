@@ -46,3 +46,4 @@ test-results.xml
 # DVC
 /data/raw/*.csv
 /data/raw/*.parquet
+.dvc_storage/

@@ -1,0 +1,102 @@
+[
+    {
+        "query": "Qual é a política de crédito para clientes PJ com faturamento acima de R$ 1 milhão?",
+        "expected_answer": "Para clientes PJ com faturamento acima de R$ 1 milhão, a política de crédito prevê análise de balanço dos últimos 3 anos, score mínimo de 700, e limite inicial de até 30% do faturamento anual.",
+        "contexts": ["Política de crédito PJ", "Faturamento e limites"]
+    },
+    {
+        "query": "Como funciona o processo de detecção de fraude em transações PIX?",
+        "expected_answer": "O processo de detecção de fraude em PIX utiliza modelo de ML em tempo real que analisa padrões de comportamento, horário, valor e destinatário. Transações suspeitas são bloqueadas e encaminhadas para análise manual.",
+        "contexts": ["Detecção de fraude", "PIX", "Modelo ML"]
+    },
+    {
+        "query": "Quais são os critérios para aprovação de empréstimo pessoal?",
+        "expected_answer": "Os critérios incluem: score de crédito mínimo de 600, renda comprovada, comprometimento de renda máximo de 30%, e ausência de restrições nos últimos 12 meses.",
+        "contexts": ["Empréstimo pessoal", "Critérios de aprovação"]
+    },
+    {
+        "query": "Qual o procedimento em caso de suspeita de lavagem de dinheiro?",
+        "expected_answer": "Em caso de suspeita de lavagem de dinheiro, o procedimento inclui: bloqueio preventivo da conta, comunicação ao COAF em até 24h, análise pela equipe de compliance, e documentação completa do caso.",
+        "contexts": ["AML", "Compliance", "COAF"]
+    },
+    {
+        "query": "Como é calculado o score de risco de um cliente?",
+        "expected_answer": "O score de risco é calculado com base em: histórico de pagamentos (40%), tempo de relacionamento (20%), renda vs comprometimento (25%), e dados cadastrais (15%). O score varia de 0 a 1000.",
+        "contexts": ["Score de risco", "Cálculo", "Variáveis"]
+    },
+    {
+        "query": "Quais são os limites de transação para conta digital?",
+        "expected_answer": "Conta digital tem limite de R$ 5.000 por transação PIX, R$ 20.000 diário para transferências, e R$ 50.000 mensal total. Limites podem ser aumentados com validação biométrica.",
+        "contexts": ["Conta digital", "Limites", "PIX"]
+    },
+    {
+        "query": "Como funciona o processo de onboarding digital?",
+        "expected_answer": "O onboarding digital inclui: captura de documento com OCR, validação facial com liveness detection, consulta a bureaus de crédito, e análise de risco automatizada. O processo leva em média 3 minutos.",
+        "contexts": ["Onboarding", "KYC", "Digital"]
+    },
+    {
+        "query": "Qual a política de retenção de dados de clientes inativos?",
+        "expected_answer": "Dados de clientes inativos são mantidos por 5 anos após o encerramento da conta, conforme exigência do Banco Central. Após esse período, dados são anonimizados, mantendo apenas informações agregadas para fins estatísticos.",
+        "contexts": ["Retenção de dados", "LGPD", "Banco Central"]
+    },
+    {
+        "query": "Como o modelo de churn prediction é atualizado?",
+        "expected_answer": "O modelo de churn é retreinado mensalmente com dados dos últimos 6 meses. Um processo champion-challenger compara o novo modelo com o atual, e só promove se houver melhoria de pelo menos 0.5% no AUC.",
+        "contexts": ["Churn", "Retraining", "Champion-challenger"]
+    },
+    {
+        "query": "Quais métricas de negócio são monitoradas pelo dashboard?",
+        "expected_answer": "O dashboard monitora: taxa de aprovação de crédito, tempo médio de resposta, taxa de fraude detectada, NPS do atendimento digital, e volume de transações por canal.",
+        "contexts": ["Dashboard", "Métricas de negócio", "KPIs"]
+    },
+    {
+        "query": "Como funciona a segmentação de clientes?",
+        "expected_answer": "A segmentação utiliza clustering (K-Means) com features de comportamento transacional, produtos contratados, e valor de relacionamento. São 5 segmentos: Básico, Intermediário, Premium, Private, e Institucional.",
+        "contexts": ["Segmentação", "Clustering", "Clientes"]
+    },
+    {
+        "query": "Qual o SLA para resposta de reclamações?",
+        "expected_answer": "O SLA para reclamações é: resposta inicial em até 2 horas úteis, resolução em até 5 dias úteis para casos simples, e 10 dias úteis para casos complexos. Reclamações no Banco Central têm SLA de 10 dias corridos.",
+        "contexts": ["SLA", "Reclamações", "Atendimento"]
+    },
+    {
+        "query": "Como é feita a precificação de produtos de crédito?",
+        "expected_answer": "A precificação considera: custo de funding (CDI + spread), risco de crédito do cliente (PD x LGD), custos operacionais, e margem alvo. O modelo de pricing é revisado trimestralmente.",
+        "contexts": ["Pricing", "Crédito", "Spread"]
+    },
+    {
+        "query": "Quais são os controles de acesso ao sistema?",
+        "expected_answer": "O sistema utiliza RBAC (Role-Based Access Control) com 4 níveis: Viewer (consulta), Analyst (consulta + relatórios), Manager (aprovações), e Admin (configuração). Autenticação via SSO com MFA obrigatório.",
+        "contexts": ["Acesso", "RBAC", "Segurança"]
+    },
+    {
+        "query": "Como funciona o processo de cobrança automatizada?",
+        "expected_answer": "A cobrança automatizada segue régua: D+1 SMS, D+3 email, D+7 ligação automática, D+15 carta, D+30 negativação. O modelo de propensão a pagamento prioriza ações por probabilidade de recuperação.",
+        "contexts": ["Cobrança", "Régua", "Automação"]
+    },
+    {
+        "query": "Qual a arquitetura do sistema de recomendação de produtos?",
+        "expected_answer": "O sistema de recomendação usa collaborative filtering + content-based, com modelo híbrido treinado semanalmente. Features incluem histórico de produtos, perfil demográfico, e comportamento digital.",
+        "contexts": ["Recomendação", "Collaborative filtering", "Produtos"]
+    },
+    {
+        "query": "Como são tratados os dados de geolocalização?",
+        "expected_answer": "Dados de geolocalização são coletados apenas com consentimento explícito, armazenados de forma agregada (nível de bairro), e utilizados exclusivamente para detecção de fraude e personalização de ofertas.",
+        "contexts": ["Geolocalização", "LGPD", "Consentimento"]
+    },
+    {
+        "query": "Qual o processo de validação de modelos antes de produção?",
+        "expected_answer": "O processo inclui: validação em holdout set, teste A/B com 5% do tráfego, aprovação do comitê de modelos, documentação no Model Card, e monitoramento intensivo nas primeiras 2 semanas.",
+        "contexts": ["Validação", "Model governance", "A/B test"]
+    },
+    {
+        "query": "Como funciona o sistema de alertas de compliance?",
+        "expected_answer": "O sistema monitora transações em tempo real contra regras de compliance (AML, PLD, sanções). Alertas são classificados por severidade (baixa, média, alta, crítica) e encaminhados para a equipe correspondente.",
+        "contexts": ["Compliance", "Alertas", "AML"]
+    },
+    {
+        "query": "Qual a estratégia de disaster recovery?",
+        "expected_answer": "A estratégia inclui: RPO de 1 hora, RTO de 4 horas, backup incremental a cada 6 horas, replicação cross-region, e teste de DR trimestral. Dados críticos têm replicação síncrona.",
+        "contexts": ["DR", "Backup", "Continuidade"]
+    }
+]

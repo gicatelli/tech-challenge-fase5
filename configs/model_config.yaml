@@ -1,0 +1,40 @@
+# Configuração de modelos — Datathon Fase 05
+# ============================================
+
+# Baseline: Random Forest
+random_forest:
+  n_estimators: 100
+  max_depth: 10
+  min_samples_split: 5
+  min_samples_leaf: 2
+  random_state: 42
+  n_jobs: -1
+
+# Baseline: MLP PyTorch
+mlp:
+  hidden_dims: [64, 32, 16]
+  dropout: 0.3
+  epochs: 50
+  batch_size: 32
+  learning_rate: 0.001
+  random_state: 42
+
+# LLM
+llm:
+  model_name: "gpt-4o-mini"
+  temperature: 0.0
+  max_tokens: 2048
+
+# RAG
+rag:
+  embedding_model: "text-embedding-3-small"
+  chunk_size: 1000
+  chunk_overlap: 200
+  top_k: 3
+  collection_name: "datathon"
+
+# Treinamento
+training:
+  test_size: 0.2
+  random_state: 42
+  cv_folds: 5

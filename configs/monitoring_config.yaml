@@ -1,0 +1,37 @@
+# Configuração de monitoramento — Datathon Fase 05
+# ============================================
+
+# Drift Detection
+drift:
+  psi_warning_threshold: 0.1
+  psi_critical_threshold: 0.2
+  check_interval_hours: 6
+  min_samples_for_check: 100
+
+# Alertas
+alerts:
+  latency_p99_threshold_ms: 5000
+  error_rate_threshold: 0.05
+  drift_alert_channels:
+    - "log"
+    - "prometheus"
+
+# Prometheus
+prometheus:
+  port: 9090
+  scrape_interval: 15s
+
+# Grafana
+grafana:
+  port: 3000
+  dashboards:
+    - "operational_metrics"
+    - "model_performance"
+    - "drift_monitoring"
+
+# Retraining triggers
+retraining:
+  trigger_on_drift: true
+  min_improvement_threshold: 0.005  # 0.5% AUC improvement
+  champion_challenger_enabled: true
+  approval_required: true

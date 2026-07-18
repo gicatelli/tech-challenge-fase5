@@ -1,9 +1,14 @@
 """Testes de modelos — baseline e métricas."""
 
-import numpy as np
-import pandas as pd
+import pytest
 
-from src.models.baseline import MLPClassifier, train_mlp, train_random_forest
+pytest.importorskip("torch", reason="torch não instalado")
+pytest.importorskip("sklearn", reason="scikit-learn não instalado")
+
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+
+from src.models.baseline import MLPClassifier, train_mlp, train_random_forest  # noqa: E402
 
 
 class TestRandomForest:

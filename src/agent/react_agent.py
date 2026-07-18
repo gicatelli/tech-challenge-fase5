@@ -8,9 +8,9 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from langchain.agents import AgentExecutor, create_react_agent
+from langchain.agents import AgentExecutor, create_react_agent  # type: ignore[attr-defined]
 from langchain.prompts import PromptTemplate
-from langchain.tools import Tool
+from langchain.tools import Tool  # type: ignore[attr-defined]
 from langchain_openai import ChatOpenAI
 
 from src.agent.tools import get_available_tools
@@ -78,7 +78,8 @@ def create_datathon_agent(
     llm = ChatOpenAI(
         model=model_name,
         temperature=temperature,
-        api_key=os.getenv("OPENAI_API_KEY"),
+        # Tipagem do langchain aceita SecretStr, mas str funciona em runtime
+        api_key=os.getenv("OPENAI_API_KEY"),  # type: ignore[arg-type]
     )
 
     agent = create_react_agent(llm=llm, tools=tools, prompt=REACT_PROMPT)

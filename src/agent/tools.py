@@ -10,7 +10,7 @@ Adapte as tools ao domínio da empresa convidada.
 import json
 import logging
 
-from langchain.tools import Tool
+from langchain.tools import Tool  # type: ignore[attr-defined]
 
 logger = logging.getLogger(__name__)
 

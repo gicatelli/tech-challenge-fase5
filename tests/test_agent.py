@@ -1,7 +1,10 @@
 """Testes do agente ReAct e tools."""
 
+import pytest
 
-from src.agent.tools import (
+langchain = pytest.importorskip("langchain", reason="langchain não instalado")
+
+from src.agent.tools import (  # noqa: E402
     analyze_data,
     calculate_risk_score,
     get_available_tools,

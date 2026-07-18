@@ -127,9 +127,10 @@ class OutputGuardrail:
 
         if results:
             logger.warning("PII detectado no output: %d entidades", len(results))
+            # Tipos de RecognizerResult diferem entre presidio-analyzer e anonymizer
             anonymized = self.anonymizer.anonymize(
                 text=llm_output,
-                analyzer_results=results,
+                analyzer_results=results,  # type: ignore[arg-type]
             )
             return anonymized.text
 

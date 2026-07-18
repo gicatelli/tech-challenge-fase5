@@ -1,8 +1,12 @@
 """Testes de feature engineering — schema contracts."""
 
-import pandas as pd
+import pytest
 
-from src.features.feature_engineering import compute_features, encode_categorical
+pytest.importorskip("pandera", reason="pandera não instalado")
+
+import pandas as pd  # noqa: E402
+
+from src.features.feature_engineering import compute_features, encode_categorical  # noqa: E402
 
 
 class TestComputeFeatures:

@@ -158,9 +158,10 @@ def anonymize_text(text: str, language: str = "pt") -> str:
     if not results:
         return text
 
+    # Tipos de RecognizerResult diferem entre presidio-analyzer e anonymizer
     anonymized = anonymizer.anonymize(
         text=text,
-        analyzer_results=results,
+        analyzer_results=results,  # type: ignore[arg-type]
         operators={
             "PERSON": OperatorConfig("replace", {"new_value": "<PESSOA>"}),
             "EMAIL_ADDRESS": OperatorConfig("replace", {"new_value": "<EMAIL>"}),

@@ -2,7 +2,9 @@
 
 import pytest
 
-from src.security.guardrails import InputGuardrail, OutputGuardrail
+pytest.importorskip("presidio_analyzer", reason="presidio não instalado")
+
+from src.security.guardrails import InputGuardrail, OutputGuardrail  # noqa: E402
 
 
 class TestInputGuardrail:

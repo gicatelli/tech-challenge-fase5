@@ -66,7 +66,8 @@ def ingest_documents(docs_path: str, collection_name: str = "datathon") -> Chrom
     # Embedding + Vector Store
     embeddings = OpenAIEmbeddings(
         model=EMBEDDING_MODEL,
-        api_key=os.getenv("OPENAI_API_KEY"),
+        # Tipagem do langchain aceita SecretStr, mas str funciona em runtime
+        api_key=os.getenv("OPENAI_API_KEY"),  # type: ignore[arg-type]
     )
 
     vectorstore = Chroma.from_documents(
@@ -92,7 +93,8 @@ def get_vectorstore(collection_name: str = "datathon") -> Chroma:
     """
     embeddings = OpenAIEmbeddings(
         model=EMBEDDING_MODEL,
-        api_key=os.getenv("OPENAI_API_KEY"),
+        # Tipagem do langchain aceita SecretStr, mas str funciona em runtime
+        api_key=os.getenv("OPENAI_API_KEY"),  # type: ignore[arg-type]
     )
 
     vectorstore = Chroma(
@@ -138,7 +140,8 @@ def generate_answer(query: str, contexts: list[str]) -> str:
     llm = ChatOpenAI(
         model=os.getenv("LLM_MODEL_NAME", "gpt-4o-mini"),
         temperature=0.0,
-        api_key=os.getenv("OPENAI_API_KEY"),
+        # Tipagem do langchain aceita SecretStr, mas str funciona em runtime
+        api_key=os.getenv("OPENAI_API_KEY"),  # type: ignore[arg-type]
     )
 
     context_text = "\n\n".join([f"Contexto {i+1}: {ctx}" for i, ctx in enumerate(contexts)])

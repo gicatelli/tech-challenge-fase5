@@ -1,8 +1,13 @@
 """Testes de integração para a API FastAPI."""
 
-from fastapi.testclient import TestClient
+import pytest
 
-from src.serving.app import app
+pytest.importorskip("langchain", reason="langchain não instalado")
+pytest.importorskip("langchain_openai", reason="langchain_openai não instalado")
+
+from fastapi.testclient import TestClient  # noqa: E402
+
+from src.serving.app import app  # noqa: E402
 
 client = TestClient(app)
 

@@ -1,0 +1,33 @@
+RESULTADOS FINANCEIROS PETROBRAS — HISTÓRICO RECENTE
+
+Estrutura de Resultados
+A Petrobras divulga resultados trimestrais (ITR) e anuais (DFP).
+Os principais indicadores monitorados pelo mercado são: produção (boe/d),
+receita líquida, EBITDA ajustado, lucro líquido, fluxo de caixa livre,
+e endividamento (dívida bruta e líquida).
+
+Métricas Operacionais Típicas
+- Produção: ~2.7 milhões boe/d (crescendo 3-5% ao ano)
+- Receita: R$ 500-600 bilhões/ano
+- EBITDA: R$ 250-350 bilhões/ano (margem 45-55%)
+- Lucro Líquido: R$ 80-130 bilhões/ano
+- Capex: R$ 50-70 bilhões/ano
+- Dividendos: R$ 60-100 bilhões/ano
+
+Dívida e Alavancagem
+- Dívida Bruta: USD 55-65 bilhões
+- Dívida Líquida: USD 40-50 bilhões
+- Alavancagem (DL/EBITDA): 0.5-1.0x (muito confortável)
+- Covenants: empresa está bem abaixo dos limites
+
+Impacto dos Resultados no Preço
+Historicamente, PETR4 reage fortemente aos resultados:
+- Resultado acima do consenso: alta de 3-8% no dia seguinte
+- Resultado abaixo do consenso: queda de 2-5%
+- Surpresa em dividendos: pode causar movimentação de 5-10%
+
+Calendário de Divulgação
+- 1T: divulgação em maio
+- 2T: divulgação em agosto
+- 3T: divulgação em novembro
+- 4T/Anual: divulgação em março do ano seguinte

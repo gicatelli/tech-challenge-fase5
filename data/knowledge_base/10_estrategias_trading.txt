@@ -1,0 +1,26 @@
+ESTRATÉGIAS DE TRADING PARA AÇÕES
+
+Trend Following (Seguir Tendência)
+Comprar quando o preço está acima da SMA 90 e vender quando cai abaixo.
+Combinar com MACD positivo para confirmação. Funciona bem em mercados
+com tendências claras. Desvantagem: gera sinais falsos em mercados laterais.
+
+Mean Reversion (Reversão à Média)
+Comprar quando RSI < 30 e vender quando RSI > 70. Assume que preços
+extremos tendem a retornar à média. Funciona em mercados laterais.
+Desvantagem: pode gerar perdas em tendências fortes.
+
+Breakout
+Comprar quando o preço rompe resistência com volume acima da média.
+Usar Bollinger Bands estreitas como indicador de breakout iminente.
+Stop loss logo abaixo do nível rompido.
+
+Pairs Trading
+Operar o spread entre duas ações correlacionadas (ex: PETR4 vs VALE3).
+Quando o spread diverge da média histórica, comprar a que ficou barata
+e vender a que ficou cara. Estratégia market-neutral.
+
+Dollar Cost Averaging (DCA)
+Investir valor fixo periodicamente, independente do preço.
+Reduz o impacto da volatilidade no longo prazo.
+Ideal para investidores de longo prazo em ativos voláteis como PETR4.

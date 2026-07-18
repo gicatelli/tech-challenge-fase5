@@ -6,8 +6,38 @@ import pytest
 
 
 @pytest.fixture
+def sample_ohlcv() -> pd.DataFrame:
+    """Dados OHLCV sintéticos simulando preços de ações (200 dias)."""
+    np.random.seed(42)
+    n = 200
+
+    # Gerar série de preços com random walk
+    returns = np.random.normal(0.001, 0.02, n)
+    prices = 30.0 * np.cumprod(1 + returns)
+
+    # OHLCV realista
+    high = prices * (1 + np.abs(np.random.normal(0.01, 0.005, n)))
+    low = prices * (1 - np.abs(np.random.normal(0.01, 0.005, n)))
+    open_prices = low + (high - low) * np.random.uniform(0.3, 0.7, n)
+    volume = np.random.lognormal(mean=17, sigma=0.5, size=n).astype(int)
+
+    dates = pd.date_range(start="2024-01-01", periods=n, freq="B")
+
+    return pd.DataFrame(
+        {
+            "Open": open_prices,
+            "High": high,
+            "Low": low,
+            "Close": prices,
+            "Volume": volume,
+        },
+        index=dates,
+    )
+
+
+@pytest.fixture
 def sample_data() -> pd.DataFrame:
-    """Dados sintéticos para testes (nunca dados reais)."""
+    """Dados sintéticos genéricos para testes."""
     np.random.seed(42)
     n = 100
     return pd.DataFrame(

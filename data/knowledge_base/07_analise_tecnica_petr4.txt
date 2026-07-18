@@ -1,0 +1,29 @@
+ANÁLISE TÉCNICA PETR4 — PADRÕES E SUPORTES/RESISTÊNCIAS
+
+Suportes e Resistências Históricos
+- Suporte forte: R$ 25-27 (região de acumulação 2022-2023)
+- Suporte intermediário: R$ 32-34 (média móvel 200 dias)
+- Resistência intermediária: R$ 40-42 (topo anterior)
+- Resistência forte: R$ 48-50 (máxima histórica)
+
+Tendências Identificadas
+A PETR4 está em tendência de alta de longo prazo desde 2018, com correções de 20-30% dentro da tendência. A SMA 200 dias serve como suporte dinâmico confiável — historicamente o preço retorna para cima dela em 80% dos toques.
+
+Padrões Gráficos Comuns em PETR4
+1. Canal de alta: PETR4 frequentemente forma canais ascendentes de 3-6 meses.
+2. Triângulos: antes de resultados trimestrais, forma triângulos de consolidação.
+3. Gaps de resultado: após divulgação de resultados, frequentemente abre com gap de 3-5%.
+4. Double bottom: em correções fortes, tende a formar fundo duplo antes de retomar alta.
+
+Volume e Confirmação
+Volume médio diário de PETR4: 50-70 milhões de ações. Rompimentos com volume acima de 1.5x a média são mais confiáveis. Dias de vencimento de opções (terceira segunda-feira do mês) têm volume 2-3x maior.
+
+Sazonalidade
+- Janeiro: "efeito janeiro" com fluxo de capital novo (positivo).
+- Março: volatilidade alta por resultados anuais e rebalanceamento de carteiras.
+- Maio: "sell in May" pode pressionar (negativo).
+- Outubro-Novembro: institucional realocando para o ano seguinte (positivo).
+- Dezembro: window dressing dos fundos (positivo).
+
+Divergências
+Quando o preço faz novas máximas mas RSI ou MACD não acompanham, há divergência bearish — sinal de possível reversão. PETR4 mostrou divergência bearish em múltiplos topos antes de correções significativas.

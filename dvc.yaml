@@ -1,25 +1,30 @@
-# DVC Pipeline — Datathon Fase 05
-# ============================================
-# Reproduzir: dvc repro
+# Pipeline DVC — Datathon Fase 05
+# Executar: dvc repro
 
 stages:
   prepare_data:
     cmd: python -m src.features.feature_engineering
     deps:
-      - data/raw/
+      - data/raw
       - src/features/feature_engineering.py
     outs:
       - data/processed/features.parquet
 
-  train_baseline:
+  train_models:
     cmd: python -m src.models.train
     deps:
-      - data/processed/features.parquet
+      - data/raw/PETR4_SA_historico.csv
       - src/models/train.py
-      - src/models/baseline.py
-    metrics:
+      - src/models/hyperparameter_tuning.py
+      - src/features/feature_engineering.py
+      - configs/model_config.yaml
+    outs:
       - metrics/train_metrics.json:
           cache: false
+    plots:
+      - metrics/train_metrics.json:
+          x: null
+          y: null
 
   evaluate:
     cmd: python -m evaluation.ragas_eval
@@ -27,6 +32,6 @@ stages:
       - data/golden_set/golden_set.json
       - evaluation/ragas_eval.py
       - src/agent/rag_pipeline.py
-    metrics:
+    outs:
       - metrics/ragas_metrics.json:
           cache: false

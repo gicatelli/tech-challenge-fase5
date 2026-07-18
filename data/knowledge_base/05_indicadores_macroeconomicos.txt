@@ -1,0 +1,22 @@
+INDICADORES MACROECONÔMICOS RELEVANTES PARA PETR4
+
+Taxa Selic
+A taxa Selic é a taxa básica de juros da economia brasileira, definida pelo COPOM (Comitê de Política Monetária) do Banco Central. Impacta PETR4 de duas formas: (1) Selic alta encarece o crédito e pode reduzir consumo de combustíveis; (2) Selic alta torna a renda fixa mais atrativa, reduzindo fluxo para ações. Historicamente, PETR4 tem correlação negativa moderada com a Selic.
+
+Câmbio (USD/BRL)
+O dólar afeta PETR4 diretamente: receitas de exportação são em dólar, então dólar alto aumenta receita em reais. Porém, dívida em dólar aumenta também. No balanço líquido, PETR4 se beneficia de dólar alto pois é exportadora líquida. Correlação positiva entre USDBRL e PETR4 é de aproximadamente 0.4.
+
+Preço do Petróleo Brent
+O Brent é a principal referência de preço para o petróleo exportado pela Petrobras. Cada USD 10 de variação no Brent impacta o EBITDA da Petrobras em aproximadamente R$ 30 bilhões por ano. A correlação entre Brent e PETR4 é a mais forte entre todos os fatores macro, tipicamente acima de 0.6.
+
+Inflação (IPCA)
+A inflação impacta a Petrobras principalmente via política de preços de combustíveis. Em períodos de inflação alta, o governo pode pressionar a empresa a segurar reajustes, comprimindo margens. A defasagem de preços em relação ao mercado internacional é um risco constantemente monitorado.
+
+PIB (Produto Interno Bruto)
+O PIB brasileiro afeta a demanda doméstica por combustíveis e derivados. Crescimento do PIB aumenta consumo de diesel (transporte), gasolina (veículos) e QAV (aviação). A elasticidade da demanda de combustíveis em relação ao PIB é de aproximadamente 0.8.
+
+Risco País (CDS Brasil)
+O Credit Default Swap de 5 anos do Brasil mede a percepção de risco soberano. CDS alto indica risco elevado, causando fuga de capital estrangeiro e pressão vendedora em ações brasileiras. PETR4, por ser uma das ações mais líquidas e com maior peso estrangeiro, é particularmente sensível.
+
+Curva de Juros Americana (Fed Funds Rate)
+A taxa de juros americana afeta o fluxo de capital para mercados emergentes. Juros altos nos EUA reduzem atratividade de ações brasileiras, pressionando PETR4. O "carry trade" (tomar emprestado em dólar barato para investir em real) se desfaz quando juros americanos sobem.

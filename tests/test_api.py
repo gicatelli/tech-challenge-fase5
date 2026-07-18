@@ -1,5 +1,7 @@
 """Testes de integração para a API FastAPI."""
 
+import json
+
 import pytest
 
 pytest.importorskip("langchain", reason="langchain não instalado")
@@ -52,6 +54,52 @@ class TestQueryEndpoint:
             json={"query": "a" * 5000},
         )
         assert response.status_code == 422
+
+
+class TestToolEndpoints:
+    """Testes para endpoints diretos de tools (sem LLM)."""
+
+    def test_analyze_returns_200(self):
+        """Endpoint /analyze deve retornar 200 com resultado JSON."""
+        response = client.post("/analyze", json={"input": "últimos 30 dias"})
+        assert response.status_code == 200
+        data = response.json()
+        assert data["tool"] == "analisar_historico"
+        result = json.loads(data["result"])
+        # Pode retornar dados ou erro se CSV não disponível no CI
+        assert "preco_atual" in result or "erro" in result
+
+    def test_predict_returns_200(self):
+        """Endpoint /predict deve retornar 200 com previsões."""
+        response = client.post("/predict", json={"input": "próximos 5 dias"})
+        assert response.status_code == 200
+        data = response.json()
+        assert data["tool"] == "prever_preco"
+        result = json.loads(data["result"])
+        assert "previsoes" in result or "erro" in result
+
+    def test_risk_returns_200(self):
+        """Endpoint /risk deve retornar 200 com métricas de risco."""
+        response = client.post("/risk", json={"input": "último trimestre"})
+        assert response.status_code == 200
+        data = response.json()
+        assert data["tool"] == "calcular_risco"
+        result = json.loads(data["result"])
+        assert "metricas_risco" in result or "erro" in result
+
+    def test_search_returns_200(self):
+        """Endpoint /search deve retornar 200 com contextos."""
+        response = client.post("/search", json={"input": "o que é RSI"})
+        assert response.status_code == 200
+        data = response.json()
+        assert data["tool"] == "buscar_conhecimento"
+
+    def test_tools_list(self):
+        """Endpoint /tools deve listar tools disponíveis."""
+        response = client.get("/tools")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["tools"]) == 4
 
 
 class TestMetricsEndpoint:

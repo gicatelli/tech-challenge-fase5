@@ -1,0 +1,43 @@
+MODELO LSTM PARA PREVISÃO DE PREÇOS — EXPLICAÇÃO TÉCNICA
+
+O que é LSTM
+LSTM (Long Short-Term Memory) é um tipo de rede neural recorrente (RNN) projetada para capturar dependências de longo prazo em sequências. Foi proposta por Hochreiter e Schmidhuber em 1997. Diferente de RNNs simples, o LSTM resolve o problema do vanishing gradient usando mecanismos de "gates" (portões).
+
+Arquitetura do LSTM
+Cada célula LSTM possui:
+- Forget Gate: decide quais informações descartar do estado anterior.
+- Input Gate: decide quais novas informações armazenar.
+- Output Gate: decide qual parte do estado usar como saída.
+- Cell State: memória de longo prazo que flui pela sequência.
+
+Como Funciona para Previsão de Preços
+1. Input: sequência de N dias de features (preço, volume, indicadores técnicos).
+2. O LSTM processa cada dia sequencialmente, atualizando seu estado interno.
+3. Após processar todos os N dias, o estado final é passado para camadas densas.
+4. Output: previsão do preço de fechamento do próximo dia.
+
+Hiperparâmetros do Modelo
+- Sequence Length (60): usa 60 dias de histórico para prever o próximo.
+- Hidden Size (128): número de neurônios na camada LSTM.
+- Num Layers (2): camadas LSTM empilhadas para capturar padrões mais abstratos.
+- Dropout (0.2): regularização para evitar overfitting.
+- Learning Rate (0.001): velocidade de aprendizado do otimizador Adam.
+- Batch Size (32): amostras processadas por iteração.
+
+Vantagens para Séries Financeiras
+- Captura dependências temporais de longo prazo (tendências).
+- Reconhece padrões não-lineares que modelos lineares não capturam.
+- Resiliente a ruído (dropout + regularização).
+- Pode incorporar múltiplas features simultaneamente.
+
+Limitações
+- Não prevê eventos imprevisíveis (black swans, notícias súbitas).
+- Performance degrada em mudanças de regime (bull → bear).
+- Requer retreinamento periódico para se adaptar a novos padrões.
+- Custo computacional maior que modelos tradicionais.
+
+Métricas de Avaliação
+- MAE (Mean Absolute Error): erro médio em reais.
+- RMSE (Root Mean Squared Error): penaliza erros grandes.
+- MAPE (Mean Absolute Percentage Error): erro percentual.
+- R² (Coeficiente de Determinação): quanto da variância o modelo explica.

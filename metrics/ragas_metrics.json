@@ -1,0 +1,12 @@
+{
+  "metrics": {
+    "faithfulness": 0.9844,
+    "answer_relevancy": 0.6326,
+    "context_precision": 0.7333,
+    "context_recall": 0.2798
+  },
+  "method": "proxy",
+  "golden_set_size": 20,
+  "threshold": 0.7,
+  "status": "NEEDS_IMPROVEMENT"
+}

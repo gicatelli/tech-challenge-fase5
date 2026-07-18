@@ -1,13 +1,11 @@
 """Testes do agente ReAct e tools."""
 
-import pytest
 
 from src.agent.tools import (
     analyze_data,
     calculate_risk_score,
     get_available_tools,
     get_model_prediction,
-    search_knowledge_base,
 )
 
 

@@ -49,6 +49,7 @@ def train_and_log(
 
     Returns:
         run_id do experimento MLflow.
+
     """
     mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000"))
     mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "datathon-fase05"))

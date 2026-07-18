@@ -1,7 +1,6 @@
 """Testes de feature engineering — schema contracts."""
 
 import pandas as pd
-import pytest
 
 from src.features.feature_engineering import compute_features, encode_categorical
 

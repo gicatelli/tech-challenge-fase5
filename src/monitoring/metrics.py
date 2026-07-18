@@ -9,7 +9,7 @@ Métricas operacionais:
 
 import logging
 
-from prometheus_client import Counter, Histogram, Gauge, Info
+from prometheus_client import Counter, Gauge, Histogram, Info
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +97,7 @@ def track_request(latency_ms: float, success: bool) -> None:
     Args:
         latency_ms: Latência em milissegundos.
         success: Se o request foi bem-sucedido.
+
     """
     status = "success" if success else "error"
     REQUEST_COUNT.labels(status=status).inc()
@@ -109,6 +110,7 @@ def track_agent_execution(steps: int, tools_used: list[str]) -> None:
     Args:
         steps: Número de steps executados.
         tools_used: Lista de tools utilizadas.
+
     """
     AGENT_STEPS.observe(steps)
     for tool in tools_used:
@@ -121,6 +123,7 @@ def track_drift(feature_name: str, psi_score: float) -> None:
     Args:
         feature_name: Nome da feature.
         psi_score: Score PSI calculado.
+
     """
     DRIFT_SCORE.labels(feature_name=feature_name).set(psi_score)
 
@@ -139,6 +142,7 @@ def update_model_info(model_name: str, version: str, framework: str) -> None:
         model_name: Nome do modelo.
         version: Versão do modelo.
         framework: Framework utilizado.
+
     """
     MODEL_INFO.info({
         "model_name": model_name,

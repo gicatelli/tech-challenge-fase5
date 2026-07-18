@@ -10,7 +10,6 @@ Implementa o pipeline completo de Retrieval-Augmented Generation:
 
 import logging
 import os
-from pathlib import Path
 
 from dotenv import load_dotenv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -41,6 +40,7 @@ def ingest_documents(docs_path: str, collection_name: str = "datathon") -> Chrom
 
     Returns:
         Vector store populado.
+
     """
     logger.info("Ingerindo documentos de: %s", docs_path)
 
@@ -88,6 +88,7 @@ def get_vectorstore(collection_name: str = "datathon") -> Chroma:
 
     Returns:
         Vector store carregado.
+
     """
     embeddings = OpenAIEmbeddings(
         model=EMBEDDING_MODEL,
@@ -112,6 +113,7 @@ def retrieve_context(query: str, top_k: int = 3) -> list[str]:
 
     Returns:
         Lista de textos relevantes.
+
     """
     vectorstore = get_vectorstore()
     results = vectorstore.similarity_search(query, k=top_k)
@@ -131,6 +133,7 @@ def generate_answer(query: str, contexts: list[str]) -> str:
 
     Returns:
         Resposta gerada pelo LLM.
+
     """
     llm = ChatOpenAI(
         model=os.getenv("LLM_MODEL_NAME", "gpt-4o-mini"),
@@ -162,6 +165,7 @@ def rag_query(query: str, top_k: int = 3) -> tuple[str, list[str]]:
 
     Returns:
         Tupla (resposta, contextos utilizados).
+
     """
     contexts = retrieve_context(query, top_k=top_k)
     answer = generate_answer(query, contexts)

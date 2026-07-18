@@ -13,9 +13,8 @@ Entidades detectadas:
 """
 
 import logging
-import re
 
-from presidio_analyzer import AnalyzerEngine, PatternRecognizer, Pattern
+from presidio_analyzer import AnalyzerEngine, Pattern, PatternRecognizer
 from presidio_anonymizer import AnonymizerEngine
 from presidio_anonymizer.entities import OperatorConfig
 
@@ -27,6 +26,7 @@ def create_br_recognizers() -> list[PatternRecognizer]:
 
     Returns:
         Lista de PatternRecognizers para dados brasileiros.
+
     """
     # CPF: XXX.XXX.XXX-XX
     cpf_recognizer = PatternRecognizer(
@@ -72,6 +72,7 @@ def create_analyzer() -> AnalyzerEngine:
 
     Returns:
         AnalyzerEngine configurado.
+
     """
     analyzer = AnalyzerEngine()
 
@@ -91,6 +92,7 @@ def detect_pii(text: str, language: str = "pt") -> list[dict]:
 
     Returns:
         Lista de entidades PII encontradas.
+
     """
     analyzer = create_analyzer()
 
@@ -134,6 +136,7 @@ def anonymize_text(text: str, language: str = "pt") -> str:
 
     Returns:
         Texto anonimizado.
+
     """
     analyzer = create_analyzer()
     anonymizer = AnonymizerEngine()

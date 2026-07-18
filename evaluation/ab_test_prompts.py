@@ -4,7 +4,6 @@ Compara diferentes configurações de prompt/RAG para
 identificar a melhor combinação.
 """
 
-import json
 import logging
 import time
 from dataclasses import dataclass
@@ -61,6 +60,7 @@ def run_ab_test(
 
     Returns:
         Resultados por configuração.
+
     """
     if configs is None:
         configs = CONFIGS

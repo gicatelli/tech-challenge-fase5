@@ -8,17 +8,15 @@ import logging
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from prometheus_client import Counter, Histogram, generate_latest
+from prometheus_client import generate_latest
 from pydantic import BaseModel, Field
 from starlette.responses import Response
 
 from src.agent.rag_pipeline import rag_query
 from src.agent.react_agent import create_datathon_agent, run_agent
 from src.monitoring.metrics import (
-    REQUEST_COUNT,
-    REQUEST_LATENCY,
     track_request,
 )
 from src.security.guardrails import InputGuardrail, OutputGuardrail
@@ -74,7 +72,10 @@ class QueryRequest(BaseModel):
     """Request para consulta ao agente."""
 
     query: str = Field(..., min_length=1, max_length=4096, description="Pergunta do usuário")
-    use_agent: bool = Field(default=True, description="Se True, usa agente ReAct. Se False, RAG direto.")
+    use_agent: bool = Field(
+        default=True,
+        description="Se True, usa agente ReAct. Se False, RAG direto.",
+    )
 
 
 class QueryResponse(BaseModel):

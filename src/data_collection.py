@@ -55,6 +55,7 @@ def collect_stock_data(
 
     Raises:
         ValueError: Se nenhum dado for encontrado para o símbolo.
+
     """
     if end_date is None:
         end_date = datetime.now().strftime("%Y-%m-%d")
@@ -104,6 +105,7 @@ def get_stock_info(symbol: str = "PETR4.SA") -> dict:
 
     Returns:
         Dicionário com informações da empresa.
+
     """
     import requests
 
@@ -139,6 +141,7 @@ def collect_multiple_stocks(
 
     Returns:
         Dicionário {symbol: DataFrame} com os dados coletados.
+
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     results: dict[str, pd.DataFrame] = {}
@@ -172,7 +175,6 @@ def collect_multiple_stocks(
         "records": {s: len(df) for s, df in results.items()},
     }
 
-    import json
 
     metadata_path = output_dir / "collection_metadata.json"
     with open(metadata_path, "w", encoding="utf-8") as f:
@@ -200,6 +202,7 @@ def collect_combined_dataset(
 
     Returns:
         DataFrame com preços de fechamento de todas as ações (colunas = símbolos).
+
     """
     if end_date is None:
         end_date = datetime.now().strftime("%Y-%m-%d")
@@ -254,7 +257,9 @@ if __name__ == "__main__":
         # Mostrar resumo dos dados existentes
         for f in existing_files:
             df = pd.read_csv(f, index_col=0, parse_dates=True)
-            print(f"  {f.name}: {len(df)} registros | {df.index[0].strftime('%Y-%m-%d')} → {df.index[-1].strftime('%Y-%m-%d')}")
+            start = df.index[0].strftime('%Y-%m-%d')
+            end = df.index[-1].strftime('%Y-%m-%d')
+            print(f"  {f.name}: {len(df)} registros | {start} → {end}")
     else:
         # Coletar ações individuais com retry
         print("\n[1/2] Coletando ações individuais (com retry)...")
@@ -268,7 +273,10 @@ if __name__ == "__main__":
             )
             if results:
                 break
-            print(f"\n[RETRY] Tentativa {attempt + 1}/{max_retries} falhou. Aguardando {retry_delay}s...")
+            print(
+                f"\n[RETRY] Tentativa {attempt + 1}/{max_retries} falhou. "
+                f"Aguardando {retry_delay}s..."
+            )
             time.sleep(retry_delay)
             retry_delay *= 2  # backoff exponencial
 

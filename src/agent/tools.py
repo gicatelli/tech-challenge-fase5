@@ -9,7 +9,6 @@ Adapte as tools ao domínio da empresa convidada.
 
 import json
 import logging
-from typing import Any
 
 from langchain.tools import Tool
 
@@ -24,6 +23,7 @@ def search_knowledge_base(query: str) -> str:
 
     Returns:
         Contexto relevante encontrado na base.
+
     """
     # TODO: Integrar com o RAG pipeline real
     from src.agent.rag_pipeline import retrieve_context
@@ -45,6 +45,7 @@ def analyze_data(query: str) -> str:
 
     Returns:
         Resultado da análise em formato textual.
+
     """
     # TODO: Implementar análise real com os dados do domínio
     logger.info("Análise de dados solicitada: %s", query[:50])
@@ -63,6 +64,7 @@ def get_model_prediction(input_data: str) -> str:
 
     Returns:
         Resultado da predição.
+
     """
     try:
         data = json.loads(input_data)
@@ -88,6 +90,7 @@ def calculate_risk_score(query: str) -> str:
 
     Returns:
         Score de risco calculado.
+
     """
     # TODO: Implementar cálculo de risco real
     logger.info("Cálculo de risco solicitado: %s", query[:50])
@@ -102,6 +105,7 @@ def get_available_tools() -> list[Tool]:
 
     Returns:
         Lista com ≥ 3 tools configuradas.
+
     """
     tools = [
         Tool(

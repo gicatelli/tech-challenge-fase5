@@ -64,6 +64,7 @@ def create_datathon_agent(
 
     Returns:
         AgentExecutor configurado.
+
     """
     if tools is None:
         tools = get_available_tools()
@@ -110,6 +111,7 @@ def run_agent(query: str, agent: AgentExecutor | None = None) -> dict:
 
     Returns:
         Dicionário com output e steps intermediários.
+
     """
     if agent is None:
         agent = create_datathon_agent()

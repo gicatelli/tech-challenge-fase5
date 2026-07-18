@@ -51,6 +51,7 @@ class InputGuardrail:
         Args:
             allowed_topics: Tópicos permitidos (se vazio, permite todos).
             max_length: Tamanho máximo do input.
+
         """
         self.allowed_topics = allowed_topics or []
         self.max_length = max_length
@@ -69,6 +70,7 @@ class InputGuardrail:
 
         Returns:
             Tupla (is_valid, reason).
+
         """
         # Check 1: Input vazio
         if not user_input or not user_input.strip():
@@ -101,6 +103,7 @@ class OutputGuardrail:
 
         Args:
             language: Idioma para detecção de PII.
+
         """
         self.analyzer = AnalyzerEngine()
         self.anonymizer = AnonymizerEngine()
@@ -114,6 +117,7 @@ class OutputGuardrail:
 
         Returns:
             Texto sanitizado.
+
         """
         results = self.analyzer.analyze(
             text=llm_output,
@@ -139,6 +143,7 @@ class OutputGuardrail:
 
         Returns:
             Tupla (is_safe, reason).
+
         """
         # Check: Output não deve conter instruções de sistema
         system_patterns = [

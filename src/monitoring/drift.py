@@ -38,6 +38,7 @@ def calculate_psi(
 
     Returns:
         Score PSI.
+
     """
     # Discretizar em bins
     bins = np.linspace(
@@ -71,6 +72,7 @@ def detect_drift(
 
     Returns:
         Dicionário com resultados de drift.
+
     """
     logger.info(
         "Detectando drift: ref=%d samples, cur=%d samples",
@@ -153,5 +155,6 @@ def should_retrain(drift_result: dict[str, Any]) -> bool:
 
     Returns:
         True se retrain é necessário.
+
     """
     return drift_result["action"] == "retrain"

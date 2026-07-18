@@ -46,6 +46,7 @@ def compute_features(df: pd.DataFrame, validate: bool = True) -> pd.DataFrame:
 
     Raises:
         pandera.errors.SchemaError: Se validação de schema falhar.
+
     """
     logger.info("Computando features para %d registros", len(df))
 
@@ -85,6 +86,7 @@ def encode_categorical(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
 
     Returns:
         DataFrame com colunas categóricas encodadas.
+
     """
     logger.info("Encoding categórico para colunas: %s", columns)
     return pd.get_dummies(df, columns=columns, drop_first=True, dtype=float)

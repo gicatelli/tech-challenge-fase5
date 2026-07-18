@@ -73,6 +73,7 @@ def evaluate_with_llm_judge(
 
     Returns:
         Dicionário com notas e justificativa.
+
     """
     if model_name is None:
         model_name = os.getenv("LLM_MODEL_NAME", "gpt-4o-mini")
@@ -118,6 +119,7 @@ def evaluate_golden_set(
 
     Returns:
         Médias dos critérios de avaliação.
+
     """
     with open(golden_set_path) as f:
         golden_set = json.load(f)

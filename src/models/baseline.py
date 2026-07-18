@@ -48,6 +48,7 @@ def train_random_forest(
 
     Returns:
         Tupla (modelo treinado, métricas, split info).
+
     """
     default_params = {
         "n_estimators": 100,
@@ -101,6 +102,7 @@ class MLPClassifier(nn.Module):
             input_dim: Número de features de entrada.
             hidden_dims: Dimensões das camadas ocultas.
             dropout: Taxa de dropout.
+
         """
         super().__init__()
         if hidden_dims is None:
@@ -130,6 +132,7 @@ class MLPClassifier(nn.Module):
 
         Returns:
             Probabilidades de classe positiva.
+
         """
         return self.network(x)
 
@@ -158,6 +161,7 @@ def train_mlp(
 
     Returns:
         Tupla (modelo treinado, métricas, scaler).
+
     """
     torch.manual_seed(random_state)
     np.random.seed(random_state)
@@ -236,6 +240,7 @@ def _compute_metrics(
 
     Returns:
         Dicionário com métricas.
+
     """
     return {
         "auc": float(roc_auc_score(y_true, y_proba)),

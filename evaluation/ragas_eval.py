@@ -12,7 +12,6 @@ Métricas implementadas:
 
 import json
 import logging
-import os
 
 import mlflow
 from datasets import Dataset
@@ -38,6 +37,7 @@ def load_golden_set(golden_set_path: str) -> list[dict]:
 
     Returns:
         Lista de dicionários com query, expected_answer, contexts.
+
     """
     with open(golden_set_path) as f:
         golden_set = json.load(f)
@@ -60,6 +60,7 @@ def evaluate_rag_pipeline(
 
     Returns:
         Dicionário com 4 métricas RAGAS.
+
     """
     golden_set = load_golden_set(golden_set_path)
 

@@ -29,6 +29,7 @@ CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 200
 EMBEDDING_MODEL = "text-embedding-3-small"
 CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIRECTORY", "./data/chroma_db")
+KNOWLEDGE_BASE_DIR = os.getenv("KNOWLEDGE_BASE_DIR", "./data/knowledge_base")
 
 
 def ingest_documents(docs_path: str, collection_name: str = "datathon") -> Chroma:
@@ -175,3 +176,53 @@ def rag_query(query: str, top_k: int = 3) -> tuple[str, list[str]]:
 
     logger.info("RAG query completa: %d contextos usados", len(contexts))
     return answer, contexts
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    )
+
+    import sys
+
+    print("=" * 60)
+    print("  RAG PIPELINE — DATATHON FASE 05")
+    print("=" * 60)
+
+    action = sys.argv[1] if len(sys.argv) > 1 else "ingest"
+
+    if action == "ingest":
+        print(f"\n[1] Ingerindo documentos de: {KNOWLEDGE_BASE_DIR}")
+        vectorstore = ingest_documents(KNOWLEDGE_BASE_DIR)
+        print("    Documentos ingeridos com sucesso!")
+        print(f"    Persist dir: {CHROMA_PERSIST_DIR}")
+
+        # Teste rápido de retrieval
+        print("\n[2] Testando retrieval...")
+        test_queries = [
+            "O que é RSI?",
+            "Quais são os riscos da Petrobras?",
+            "Como calcular o VaR?",
+            "O que é o pré-sal?",
+            "Qual a política de dividendos da Petrobras?",
+        ]
+
+        for query in test_queries:
+            contexts = retrieve_context(query, top_k=2)
+            print(f"\n  Q: {query}")
+            print(f"  A: {contexts[0][:120]}..." if contexts else "  A: Nenhum contexto encontrado")
+
+    elif action == "query":
+        query = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else "O que é RSI?"
+        print(f"\nQuery: {query}")
+        answer, contexts = rag_query(query)
+        print(f"\nResposta: {answer}")
+        print(f"\nContextos utilizados: {len(contexts)}")
+        for i, ctx in enumerate(contexts):
+            print(f"  [{i+1}] {ctx[:100]}...")
+
+    else:
+        print("Uso:")
+        print("  python -m src.agent.rag_pipeline ingest   # Ingerir documentos")
+        print("  python -m src.agent.rag_pipeline query <pergunta>  # Consultar RAG")

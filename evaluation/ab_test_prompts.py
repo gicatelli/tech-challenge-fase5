@@ -76,7 +76,7 @@ def run_single_query_with_config(
 
     try:
         # Tentar usar RAG pipeline completo (requer OpenAI)
-        from src.agent.rag_pipeline import generate_answer, retrieve_context
+        from src.agent.rag_pipeline import retrieve_context
 
         contexts = retrieve_context(query, top_k=top_k)
         # Gerar com temperature customizada
@@ -239,7 +239,8 @@ def generate_report(results: dict) -> str:
     for name, data in results.items():
         m = data["metrics"]
         report.append(
-            f"| {name} | {m['avg_latency_ms']} | {m['p95_latency_ms']} | {m['avg_answer_length']} chars |"
+            f"| {name} | {m['avg_latency_ms']} | "
+            f"{m['p95_latency_ms']} | {m['avg_answer_length']} chars |"
         )
 
     # Recomendação

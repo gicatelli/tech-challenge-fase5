@@ -1,6 +1,19 @@
 # Configuração de modelos — Datathon Fase 05
 # ============================================
 
+# LSTM Otimizado (preenchido automaticamente pelo Optuna)
+# Execute: python -m src.models.hyperparameter_tuning
+lstm_optimized:
+  hidden_size_1: 128
+  hidden_size_2: 64
+  num_layers: 2
+  dropout: 0.2
+  learning_rate: 0.001
+  batch_size: 32
+  sequence_length: 60
+  optimization: "optuna_bayesian"
+  note: "Valores padrão — executar Optuna para otimizar"
+
 # Baseline: Random Forest
 random_forest:
   n_estimators: 100

@@ -2,6 +2,15 @@
 
 Expõe o agente ReAct e o pipeline RAG via API REST documentada.
 Inclui health check, métricas Prometheus e guardrails de segurança.
+
+Endpoints:
+- GET  /health   — Health check
+- POST /query    — Consulta via agente ReAct ou RAG
+- POST /analyze  — Análise direta de dados (sem LLM)
+- POST /predict  — Previsão de preços (sem LLM)
+- POST /risk     — Cálculo de risco (sem LLM)
+- GET  /tools    — Lista tools disponíveis
+- GET  /metrics  — Métricas Prometheus
 """
 
 import logging
@@ -14,8 +23,12 @@ from prometheus_client import generate_latest
 from pydantic import BaseModel, Field
 from starlette.responses import Response
 
-from src.agent.rag_pipeline import rag_query
-from src.agent.react_agent import create_datathon_agent, run_agent
+from src.agent.tools import (
+    analisar_historico,
+    buscar_conhecimento,
+    calcular_risco,
+    prever_preco,
+)
 from src.monitoring.metrics import (
     track_request,
 )
@@ -27,7 +40,7 @@ logger = logging.getLogger(__name__)
 input_guardrail = InputGuardrail()
 output_guardrail = OutputGuardrail()
 
-# Agent (lazy init)
+# Agent (lazy init — requer OPENAI_API_KEY)
 _agent = None
 
 
@@ -35,6 +48,8 @@ def get_agent():
     """Lazy initialization do agente."""
     global _agent
     if _agent is None:
+        from src.agent.react_agent import create_datathon_agent
+
         _agent = create_datathon_agent()
     return _agent
 
@@ -129,12 +144,16 @@ async def query_agent(request: QueryRequest):
 
     try:
         if request.use_agent:
+            from src.agent.react_agent import run_agent
+
             agent = get_agent()
             result = run_agent(request.query, agent)
             answer = result["answer"]
             contexts: list[str] = []
             steps = result["steps"]
         else:
+            from src.agent.rag_pipeline import rag_query
+
             answer, contexts = rag_query(request.query)
             steps = 0
 
@@ -164,6 +183,92 @@ async def query_agent(request: QueryRequest):
 async def metrics():
     """Endpoint Prometheus para métricas."""
     return Response(content=generate_latest(), media_type="text/plain")
+
+
+# ============================================
+# Endpoints diretos (sem LLM — tools reais)
+# ============================================
+
+
+class ToolRequest(BaseModel):
+    """Request genérica para tools diretas."""
+
+    input: str = Field(..., min_length=1, max_length=2048, description="Input para a tool")
+
+
+class ToolResponse(BaseModel):
+    """Response de tool direta."""
+
+    tool: str
+    result: str
+    latency_ms: float
+
+
+@app.post("/analyze", response_model=ToolResponse, tags=["Tools"])
+async def analyze_endpoint(request: ToolRequest):
+    """Análise de dados históricos (sem LLM)."""
+    start = time.time()
+    result = analisar_historico(request.input)
+    latency = (time.time() - start) * 1000
+    return ToolResponse(tool="analisar_historico", result=result, latency_ms=round(latency, 2))
+
+
+@app.post("/predict", response_model=ToolResponse, tags=["Tools"])
+async def predict_endpoint(request: ToolRequest):
+    """Previsão de preço (sem LLM)."""
+    start = time.time()
+    result = prever_preco(request.input)
+    latency = (time.time() - start) * 1000
+    return ToolResponse(tool="prever_preco", result=result, latency_ms=round(latency, 2))
+
+
+@app.post("/risk", response_model=ToolResponse, tags=["Tools"])
+async def risk_endpoint(request: ToolRequest):
+    """Cálculo de risco (sem LLM)."""
+    start = time.time()
+    result = calcular_risco(request.input)
+    latency = (time.time() - start) * 1000
+    return ToolResponse(tool="calcular_risco", result=result, latency_ms=round(latency, 2))
+
+
+@app.post("/search", response_model=ToolResponse, tags=["Tools"])
+async def search_endpoint(request: ToolRequest):
+    """Busca na base de conhecimento (sem LLM)."""
+    start = time.time()
+    result = buscar_conhecimento(request.input)
+    latency = (time.time() - start) * 1000
+    return ToolResponse(tool="buscar_conhecimento", result=result, latency_ms=round(latency, 2))
+
+
+@app.get("/tools", tags=["System"])
+async def list_tools():
+    """Lista tools disponíveis do agente."""
+    return {
+        "tools": [
+            {
+                "name": "prever_preco",
+                "endpoint": "/predict",
+                "description": "Previsão de preço PETR4",
+            },
+            {
+                "name": "analisar_historico",
+                "endpoint": "/analyze",
+                "description": "Análise de dados históricos",
+            },
+            {
+                "name": "buscar_conhecimento",
+                "endpoint": "/search",
+                "description": "Busca na base de conhecimento",
+            },
+            {
+                "name": "calcular_risco",
+                "endpoint": "/risk",
+                "description": "Cálculo de métricas de risco",
+            },
+        ],
+        "agent_endpoint": "/query",
+        "note": "Use /query para consultas que combinam múltiplas tools via agente ReAct.",
+    }
 
 
 if __name__ == "__main__":

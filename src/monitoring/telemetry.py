@@ -201,7 +201,7 @@ def _log_to_langfuse(trace_dict: dict) -> None:
             host=os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com"),
         )
 
-        trace = langfuse.trace(
+        trace = langfuse.trace(  # type: ignore[attr-defined]
             name=f"query-{trace_dict['method']}",
             input=trace_dict["query"],
             output=trace_dict["output"],

@@ -7,31 +7,75 @@ drift:
   psi_critical_threshold: 0.2
   check_interval_hours: 6
   min_samples_for_check: 100
+  features_monitored:
+    - rsi_14
+    - volatility_30
+    - log_return
+    - volume_norm
+    - price_sma30_ratio
 
-# Alertas
-alerts:
-  latency_p99_threshold_ms: 5000
-  error_rate_threshold: 0.05
-  drift_alert_channels:
-    - "log"
-    - "prometheus"
+# Regras de Alerta
+alert_rules:
+  - name: "drift_critical"
+    condition: "max_psi > 0.2"
+    severity: critical
+    action: retrain
+    description: "PSI > 0.2 detectado — retrain automatizado triggerado"
+    notification: ["log", "prometheus", "mlflow"]
+
+  - name: "drift_warning"
+    condition: "max_psi > 0.1"
+    severity: warning
+    action: monitor
+    description: "PSI > 0.1 detectado — monitoramento intensificado"
+    notification: ["log", "prometheus"]
+
+  - name: "latency_high"
+    condition: "p99_latency_ms > 5000"
+    severity: warning
+    action: scale
+    description: "Latência P99 acima de 5s — considerar escalar"
+    notification: ["log", "prometheus"]
+
+  - name: "error_rate_high"
+    condition: "error_rate > 0.05"
+    severity: critical
+    action: rollback
+    description: "Taxa de erro acima de 5% — considerar rollback"
+    notification: ["log", "prometheus", "mlflow"]
+
+  - name: "model_degradation"
+    condition: "rmse_current > rmse_baseline * 1.2"
+    severity: warning
+    action: retrain
+    description: "RMSE degradou 20%+ vs baseline — agendar retrain"
+    notification: ["log", "mlflow"]
 
 # Prometheus
 prometheus:
   port: 9090
   scrape_interval: 15s
+  metrics_path: /metrics
 
 # Grafana
 grafana:
   port: 3000
+  admin_password: datathon2024
   dashboards:
-    - "operational_metrics"
-    - "model_performance"
-    - "drift_monitoring"
+    - "datathon_overview"
 
-# Retraining triggers
+# Retraining Pipeline (triggerado por alertas)
 retraining:
   trigger_on_drift: true
-  min_improvement_threshold: 0.005  # 0.5% AUC improvement
+  trigger_condition: "PSI > 0.2 em qualquer feature monitorada"
+  pipeline_steps:
+    - "Carregar dados atualizados via yfinance"
+    - "Computar features com feature_engineering.py"
+    - "Treinar challenger com hyperparameter_tuning.py"
+    - "Comparar champion vs challenger (RMSE em holdout)"
+    - "Promover apenas se delta_rmse >= 0.005 (0.5% melhoria)"
+    - "Registrar no Model Registry com tags atualizadas"
+  min_improvement_threshold: 0.005
   champion_challenger_enabled: true
   approval_required: true
+  approval_gate: "Human-in-the-loop antes de produção"

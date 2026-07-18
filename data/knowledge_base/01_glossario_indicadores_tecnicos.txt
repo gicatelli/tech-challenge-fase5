@@ -1,0 +1,22 @@
+GLOSSÁRIO DE INDICADORES TÉCNICOS
+
+RSI (Relative Strength Index)
+O RSI é um oscilador de momentum que mede a velocidade e a magnitude das mudanças de preço. Varia de 0 a 100. Valores acima de 70 indicam condição de sobrecompra (possível reversão para baixa). Valores abaixo de 30 indicam sobrevenda (possível reversão para alta). O período padrão é de 14 dias. O RSI é calculado como: RSI = 100 - (100 / (1 + RS)), onde RS = média dos ganhos / média das perdas no período.
+
+MACD (Moving Average Convergence Divergence)
+O MACD é um indicador de tendência e momentum. É composto por três elementos: a linha MACD (EMA 12 - EMA 26), a linha de sinal (EMA 9 da linha MACD) e o histograma (diferença entre MACD e sinal). Quando a linha MACD cruza acima da linha de sinal, é um sinal de compra. Quando cruza abaixo, é sinal de venda. O histograma crescente indica momentum positivo.
+
+SMA (Simple Moving Average)
+A Média Móvel Simples é a média aritmética dos preços nos últimos N períodos. SMA 7 é usada para tendência de curtíssimo prazo. SMA 30 para tendência de curto prazo. SMA 90 para tendência de médio prazo. SMA 200 para tendência de longo prazo. O cruzamento de médias (SMA curta cruzando SMA longa para cima) é chamado "golden cross" e indica tendência de alta.
+
+EMA (Exponential Moving Average)
+A Média Móvel Exponencial dá mais peso aos preços recentes, reagindo mais rapidamente a mudanças. A fórmula usa um fator de suavização: EMA = Preço_hoje × k + EMA_ontem × (1 - k), onde k = 2 / (N + 1). EMAs são preferidas para sinais de trading por serem mais responsivas.
+
+Bollinger Bands (Bandas de Bollinger)
+As Bandas de Bollinger consistem em uma média móvel central (geralmente SMA 20) e duas bandas a 2 desvios padrão acima e abaixo. Quando o preço toca a banda superior, pode estar sobrecomprado. Quando toca a banda inferior, pode estar sobrevendido. A largura das bandas indica volatilidade: bandas estreitas indicam baixa volatilidade (possível breakout iminente), bandas largas indicam alta volatilidade.
+
+Volume
+O volume representa o número de ações negociadas em um período. Volume crescente confirma tendências. Volume decrescente sugere fraqueza na tendência. O volume normalizado (ratio vs média de 30 dias) acima de 1.5 indica atividade incomum.
+
+OBV (On-Balance Volume)
+O OBV acumula volume nos dias de alta e subtrai nos dias de baixa. Divergências entre OBV e preço podem antecipar reversões. Se o preço sobe mas OBV cai, a alta pode não ser sustentável.

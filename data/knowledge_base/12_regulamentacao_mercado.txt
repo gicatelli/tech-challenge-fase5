@@ -1,0 +1,35 @@
+REGULAMENTAÇÃO DO MERCADO DE CAPITAIS BRASILEIRO
+
+CVM (Comissão de Valores Mobiliários)
+A CVM é a autarquia responsável por regular o mercado de capitais no Brasil.
+Fiscaliza emissores, intermediários, fundos e investidores. Define regras
+de disclosure, governança e proteção ao investidor.
+
+B3 (Brasil, Bolsa, Balcão)
+A B3 é a bolsa de valores brasileira, resultante da fusão de BM&F, Bovespa
+e Cetip. Opera o pregão eletrônico, câmara de compensação e depositária.
+O horário de negociação é das 10h às 18h (horário de Brasília).
+
+Insider Trading
+É proibido negociar ações usando informação privilegiada não pública.
+A Petrobras tem períodos de blackout (15 dias antes de resultados)
+em que insiders não podem negociar. Punição: multa de até 3x o lucro
+obtido e possível prisão.
+
+Fato Relevante
+Empresas listadas devem divulgar imediatamente qualquer fato que possa
+influenciar o preço das ações. Petrobras publica fatos relevantes sobre:
+descobertas de petróleo, mudanças na diretoria, política de preços,
+dividendos extraordinários e operações societárias.
+
+Tributação
+- Day trade: 20% de IR sobre lucro, sem isenção.
+- Swing trade: 15% de IR sobre lucro, isenção até R$ 20.000/mês em vendas.
+- Dividendos: isentos de IR (pode mudar com reforma tributária).
+- JCP (Juros sobre Capital Próprio): 15% de IR retido na fonte.
+
+Segmentos de Listagem
+- Novo Mercado: mais alto nível de governança (100% ON, tag along 100%).
+- Nível 2: permite PN, tag along 100%.
+- Nível 1: exigências mínimas de disclosure.
+- Petrobras está no Nível 2 da B3.

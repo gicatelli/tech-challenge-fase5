@@ -1,0 +1,27 @@
+CONCEITOS DE GESTÃO DE RISCO
+
+VaR (Value at Risk)
+O VaR estima a perda máxima esperada em um determinado nível de confiança e horizonte temporal. Exemplo: VaR 95% diário de R$ 1.000 significa que há 5% de chance de perder mais que R$ 1.000 em um dia. Métodos de cálculo: Paramétrico (assume normalidade), Histórico (usa distribuição real), Monte Carlo (simulação).
+
+Para PETR4 com volatilidade anualizada de 36%, o VaR 95% diário é aproximadamente: Preço × 1.645 × (0.36 / √252) ≈ 3.7% do valor da posição.
+
+Expected Shortfall (CVaR)
+O Expected Shortfall (também chamado CVaR - Conditional Value at Risk) mede a perda média quando o VaR é excedido. É mais conservador que o VaR pois considera a severidade das perdas extremas. Para distribuições com caudas pesadas (como retornos de PETR4, curtose=25), o CVaR pode ser 50-100% maior que o VaR.
+
+Drawdown
+Drawdown é a queda percentual do pico ao vale. O Maximum Drawdown (MDD) é o maior drawdown histórico. Para PETR4, o MDD histórico é de -63.4% (2018-2020). O drawdown é uma medida de risco que investidores sentem diretamente — é a perda máxima que teriam sofrido se comprassem no topo.
+
+Sharpe Ratio
+O Sharpe Ratio mede o retorno ajustado ao risco: Sharpe = (Retorno - Taxa Livre de Risco) / Volatilidade. Sharpe > 1 é considerado bom. Sharpe > 2 é excelente. Para PETR4, com retorno anualizado de ~40% e volatilidade de 36%, o Sharpe é aproximadamente (0.40 - 0.10) / 0.36 ≈ 0.83.
+
+Sortino Ratio
+Similar ao Sharpe, mas considera apenas a volatilidade negativa (downside). É mais adequado quando a distribuição de retornos é assimétrica. Sortino = (Retorno - MAR) / Downside Deviation. Onde MAR é o Minimum Acceptable Return.
+
+Beta e Correlação
+Beta = Covariância(Ação, Mercado) / Variância(Mercado). Mede risco sistemático (não diversificável). PETR4 tem beta de 1.0-1.5 em relação ao Ibovespa. Risco específico (não sistemático) pode ser reduzido via diversificação.
+
+Volatilidade Implícita vs Realizada
+Volatilidade realizada é calculada a partir de retornos históricos. Volatilidade implícita é extraída dos preços de opções (mercado futuro). Quando implícita > realizada, o mercado espera mais volatilidade (investidores pagam prêmio por proteção). O spread entre as duas é indicador de sentimento.
+
+Stress Testing
+Stress testing simula cenários extremos: queda de 50% no Brent, alta de 30% no dólar, crise política. Para PETR4, os cenários de stress mais relevantes são: (1) colapso do preço do petróleo (como em 2020), (2) intervenção política nos preços, (3) acidente ambiental.

@@ -1,0 +1,22 @@
+GLOSSÁRIO FINANCEIRO GERAL
+
+P/L (Preço/Lucro)
+O índice Preço/Lucro é a razão entre o preço da ação e o lucro por ação (LPA). Um P/L de 10 significa que o investidor paga 10 vezes o lucro anual da empresa. P/L alto pode indicar expectativa de crescimento. P/L baixo pode indicar subvalorização ou problemas. Para o setor de petróleo, P/L entre 5 e 15 é considerado normal.
+
+Dividend Yield
+O Dividend Yield é a razão entre os dividendos pagos por ação e o preço da ação, expresso em percentual. Um DY de 5% significa que o investidor recebe 5% ao ano em dividendos. Petrobras historicamente tem DY elevado (8-15%) por ser estatal com política de distribuição agressiva.
+
+Market Cap (Capitalização de Mercado)
+Market Cap = Preço da ação × Número total de ações. Classifica empresas em: Small Cap (até R$ 5 bilhões), Mid Cap (R$ 5-20 bilhões), Large Cap (acima de R$ 20 bilhões). Petrobras é uma das maiores Large Caps da B3, com market cap superior a R$ 400 bilhões.
+
+Beta
+O Beta mede a sensibilidade de uma ação em relação ao mercado. Beta = 1 significa que a ação se move igual ao mercado. Beta > 1 é mais volátil que o mercado. Beta < 1 é menos volátil. PETR4 tipicamente tem beta entre 1.0 e 1.5, variando com o preço do petróleo.
+
+Free Float
+Free Float é o percentual de ações disponíveis para negociação no mercado. Exclui ações de controladores e tesouraria. Quanto maior o free float, maior a liquidez. PETR4 tem free float de aproximadamente 63%.
+
+EBITDA
+EBITDA (Earnings Before Interest, Taxes, Depreciation and Amortization) é uma medida de geração operacional de caixa. Remove efeitos de estrutura de capital, tributação e depreciação. Margem EBITDA = EBITDA / Receita Líquida. Petrobras tem margem EBITDA entre 40-50%.
+
+ROE (Return on Equity)
+ROE = Lucro Líquido / Patrimônio Líquido. Mede a eficiência da empresa em gerar lucro com o capital dos acionistas. ROE acima de 15% é considerado bom. Petrobras tem ROE variando entre 20-35% nos últimos anos.

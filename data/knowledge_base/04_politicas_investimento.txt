@@ -1,0 +1,27 @@
+POLÍTICAS DE INVESTIMENTO E ALOCAÇÃO
+
+Regras Gerais de Alocação
+Uma carteira diversificada deve seguir princípios de alocação baseados no perfil de risco do investidor:
+- Conservador: 70% renda fixa, 20% ações, 10% alternativos
+- Moderado: 50% renda fixa, 35% ações, 15% alternativos
+- Agressivo: 20% renda fixa, 60% ações, 20% alternativos
+
+Limites de Concentração
+Nenhuma ação individual deve representar mais de 10% do portfólio total. Nenhum setor deve representar mais de 25% da carteira de ações. A exposição a uma única commodity (ex: petróleo) não deve exceder 15% do portfólio.
+
+Regras de Stop Loss
+Stop loss fixo: vender se a ação cair mais de 10% do preço de compra.
+Stop loss trailing: proteger lucros movendo o stop conforme o preço sobe.
+Stop loss por volatilidade: definir stop em 2x ATR (Average True Range) abaixo do preço.
+
+Regras de Entrada
+Entrar em posição apenas quando: RSI abaixo de 30 (sobrevenda) OU cruzamento de médias (golden cross) OU rompimento de resistência com volume acima da média. Nunca entrar contra a tendência de médio prazo (SMA 90).
+
+Regras de Saída
+Considerar saída quando: RSI acima de 70 (sobrecompra) OU divergência negativa no MACD OU preço tocar banda superior de Bollinger com volume decrescente. Realizar lucro parcial (50%) ao atingir target e mover stop para preço de entrada.
+
+Rebalanceamento
+A carteira deve ser rebalanceada trimestralmente ou quando qualquer ativo desviar mais de 5% da alocação alvo. O rebalanceamento reduz risco e força disciplina de comprar barato e vender caro.
+
+Gestão de Caixa
+Manter mínimo de 5% em caixa para oportunidades. Em mercados de alta volatilidade (VIX > 30 ou equivalente brasileiro), aumentar caixa para 15-20%. Nunca usar mais de 80% do capital disponível em posições.

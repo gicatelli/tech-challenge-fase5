@@ -326,13 +326,14 @@ def prepare_sequences(
     data = features_df.values
     target_idx = features_df.columns.get_loc(target_col)
 
-    X, y = [], []
+    x_list: list = []
+    y_list: list = []
     for i in range(sequence_length, len(data)):
-        X.append(data[i - sequence_length:i])
-        y.append(data[i, target_idx])
+        x_list.append(data[i - sequence_length:i])
+        y_list.append(data[i, target_idx])
 
-    X = np.array(X)
-    y = np.array(y)
+    X = np.array(x_list)
+    y = np.array(y_list)
 
     logger.info(
         "Sequências criadas: X=%s, y=%s (seq_len=%d)",

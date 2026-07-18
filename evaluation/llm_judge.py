@@ -63,7 +63,7 @@ que precisam de informações para TOMAR DECISÕES de investimento.
    (1=confusa, 3=razoável, 5=cristalina)
 
 Responda APENAS no formato JSON (sem markdown):
-{{"correcao_factual": <1-5>, "completude": <1-5>, "relevancia_negocio": <1-5>, "clareza": <1-5>, "justificativa": "<1 frase>"}}"""
+{{"correcao_factual": <1-5>, "completude": <1-5>, "relevancia_negocio": <1-5>, "clareza": <1-5>, "justificativa": "<1 frase>"}}"""  # noqa: E501
 
 
 def evaluate_single_with_llm(
@@ -133,7 +133,6 @@ def evaluate_single_proxy(
     """
     answer_words = set(answer.lower().split())
     truth_words = set(ground_truth.lower().split())
-    query_words = set(question.lower().split())
 
     # Correção: overlap entre answer e ground truth
     if truth_words:

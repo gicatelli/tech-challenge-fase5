@@ -8,12 +8,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar e instalar dependências Python
-COPY pyproject.toml .
-RUN pip install --no-cache-dir -e .
-
-# Copiar código fonte
+COPY pyproject.toml README.md ./
 COPY src/ src/
+RUN pip install --no-cache-dir .
+
+# Copiar configs
 COPY configs/ configs/
+COPY data/knowledge_base/ data/knowledge_base/
 
 # Variáveis de ambiente
 ENV PYTHONPATH=/app

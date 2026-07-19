@@ -116,26 +116,56 @@ def run_agent(query: str, agent: AgentExecutor | None = None) -> dict:
     """
     from src.monitoring.telemetry import trace_query
 
-    if agent is None:
-        agent = create_datathon_agent()
-
     with trace_query(query, method="agent") as trace:
-        result = agent.invoke({"input": query})
-        steps = len(result.get("intermediate_steps", []))
+        # Tentar usar agente completo (requer OpenAI)
+        try:
+            if agent is None:
+                agent = create_datathon_agent()
 
-        # Extrair tools usadas
-        tools_used = []
-        for step in result.get("intermediate_steps", []):
-            if hasattr(step[0], "tool"):
-                tools_used.append(step[0].tool)
+            result = agent.invoke({"input": query})
+            steps = len(result.get("intermediate_steps", []))
 
-        trace.set_output(result["output"])
+            # Extrair tools usadas
+            tools_used = []
+            for step in result.get("intermediate_steps", []):
+                if hasattr(step[0], "tool"):
+                    tools_used.append(step[0].tool)
+
+            answer = result["output"]
+
+        except Exception as e:
+            logger.warning("Agente LLM falhou (%s), usando fallback com tools diretas", e)
+
+            # Fallback: executar tools relevantes diretamente
+            tools = get_available_tools()
+            tools_used = []
+            answer_parts = []
+
+            for tool in tools:
+                try:
+                    tool_result = tool.run(query)
+                    if tool_result and "Erro" not in str(tool_result):
+                        answer_parts.append(f"[{tool.name}]: {tool_result}")
+                        tools_used.append(tool.name)
+                except Exception:
+                    continue
+
+            if answer_parts:
+                answer = "\n\n".join(answer_parts[:2])
+            else:
+                answer = (
+                    "Não foi possível processar a consulta no momento. "
+                    "O serviço de LLM está indisponível."
+                )
+            steps = len(tools_used)
+
+        trace.set_output(answer)
         trace.set_tools(tools_used)
 
     logger.info("Agente respondeu em %d steps", steps)
 
     return {
-        "answer": result["output"],
+        "answer": answer,
         "steps": steps,
         "tools_used": tools_used,
     }

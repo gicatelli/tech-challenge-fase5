@@ -6,6 +6,10 @@ Implementa o pipeline completo de Retrieval-Augmented Generation:
 3. Armazenamento em vector store (ChromaDB)
 4. Retrieval por similaridade
 5. Geração de resposta com contexto
+
+Suporta dois modos de embedding:
+- LOCAL (padrão): sentence-transformers (gratuito, offline)
+- OPENAI: OpenAI text-embedding-3-small (requer API key com créditos)
 """
 
 import logging
@@ -17,7 +21,6 @@ from langchain_community.document_loaders import (
     TextLoader,
 )
 from langchain_community.vectorstores import Chroma
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 load_dotenv()
@@ -28,8 +31,45 @@ logger = logging.getLogger(__name__)
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 200
 EMBEDDING_MODEL = "text-embedding-3-small"
+LOCAL_EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIRECTORY", "./data/chroma_db")
 KNOWLEDGE_BASE_DIR = os.getenv("KNOWLEDGE_BASE_DIR", "./data/knowledge_base")
+
+# Modo de embedding: "local" (sentence-transformers) ou "openai"
+EMBEDDING_MODE = os.getenv("EMBEDDING_MODE", "local").lower()
+
+
+def get_embeddings():
+    """Retorna o modelo de embeddings conforme configuração.
+
+    Usa sentence-transformers local por padrão (gratuito, offline).
+    Se EMBEDDING_MODE=openai e OPENAI_API_KEY válida, usa OpenAI.
+
+    Returns:
+        Instância de embeddings compatível com LangChain.
+
+    """
+    if EMBEDDING_MODE == "openai" and os.getenv("OPENAI_API_KEY"):
+        try:
+            from langchain_openai import OpenAIEmbeddings
+
+            logger.info("Usando embeddings OpenAI: %s", EMBEDDING_MODEL)
+            return OpenAIEmbeddings(
+                model=EMBEDDING_MODEL,
+                api_key=os.getenv("OPENAI_API_KEY"),  # type: ignore[arg-type]
+            )
+        except Exception as e:
+            logger.warning("OpenAI embeddings falhou (%s), usando local", e)
+
+    # Default: embeddings locais gratuitos
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+
+    logger.info("Usando embeddings locais: %s", LOCAL_EMBEDDING_MODEL)
+    return HuggingFaceEmbeddings(
+        model_name=LOCAL_EMBEDDING_MODEL,
+        model_kwargs={"device": "cpu"},
+        encode_kwargs={"normalize_embeddings": True},
+    )
 
 
 def ingest_documents(docs_path: str, collection_name: str = "datathon") -> Chroma:
@@ -65,11 +105,7 @@ def ingest_documents(docs_path: str, collection_name: str = "datathon") -> Chrom
     logger.info("Chunks gerados: %d", len(chunks))
 
     # Embedding + Vector Store
-    embeddings = OpenAIEmbeddings(
-        model=EMBEDDING_MODEL,
-        # Tipagem do langchain aceita SecretStr, mas str funciona em runtime
-        api_key=os.getenv("OPENAI_API_KEY"),  # type: ignore[arg-type]
-    )
+    embeddings = get_embeddings()
 
     vectorstore = Chroma.from_documents(
         documents=chunks,
@@ -92,11 +128,7 @@ def get_vectorstore(collection_name: str = "datathon") -> Chroma:
         Vector store carregado.
 
     """
-    embeddings = OpenAIEmbeddings(
-        model=EMBEDDING_MODEL,
-        # Tipagem do langchain aceita SecretStr, mas str funciona em runtime
-        api_key=os.getenv("OPENAI_API_KEY"),  # type: ignore[arg-type]
-    )
+    embeddings = get_embeddings()
 
     vectorstore = Chroma(
         persist_directory=CHROMA_PERSIST_DIR,
@@ -130,24 +162,31 @@ def retrieve_context(query: str, top_k: int = 3) -> list[str]:
 def generate_answer(query: str, contexts: list[str]) -> str:
     """Gera resposta usando LLM com contexto do RAG.
 
+    Se OpenAI não estiver disponível, retorna resposta baseada nos contextos.
+
     Args:
         query: Pergunta do usuário.
         contexts: Contextos recuperados do vector store.
 
     Returns:
-        Resposta gerada pelo LLM.
+        Resposta gerada pelo LLM ou baseada em contexto.
 
     """
-    llm = ChatOpenAI(
-        model=os.getenv("LLM_MODEL_NAME", "gpt-4o-mini"),
-        temperature=0.0,
-        # Tipagem do langchain aceita SecretStr, mas str funciona em runtime
-        api_key=os.getenv("OPENAI_API_KEY"),  # type: ignore[arg-type]
-    )
-
     context_text = "\n\n".join([f"Contexto {i+1}: {ctx}" for i, ctx in enumerate(contexts)])
 
-    prompt = f"""Com base nos contextos fornecidos, responda a pergunta do usuário.
+    # Tentar usar OpenAI
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    if api_key and not api_key.startswith("sk-proj-PLACEHOLDER"):
+        try:
+            from langchain_openai import ChatOpenAI
+
+            llm = ChatOpenAI(
+                model=os.getenv("LLM_MODEL_NAME", "gpt-4o-mini"),
+                temperature=0.0,
+                api_key=api_key,  # type: ignore[arg-type]
+            )
+
+            prompt = f"""Com base nos contextos fornecidos, responda a pergunta do usuário.
 Se a informação não estiver nos contextos, diga claramente que não encontrou.
 
 {context_text}
@@ -156,8 +195,19 @@ Pergunta: {query}
 
 Resposta:"""
 
-    response = llm.invoke(prompt)
-    return response.content  # type: ignore[return-value]
+            response = llm.invoke(prompt)
+            return response.content  # type: ignore[return-value]
+        except Exception as e:
+            logger.warning("OpenAI LLM falhou (%s), usando resposta baseada em contexto", e)
+
+    # Fallback: resposta baseada em contexto (sem LLM)
+    if contexts:
+        return (
+            f"Com base nos documentos disponíveis sobre o tema:\n\n"
+            f"{contexts[0]}\n\n"
+            f"{'Informação adicional: ' + contexts[1] if len(contexts) > 1 else ''}"
+        )
+    return "Não foi possível encontrar informações relevantes para sua pergunta."
 
 
 def rag_query(query: str, top_k: int = 3) -> tuple[str, list[str]]:

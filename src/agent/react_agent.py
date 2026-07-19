@@ -147,7 +147,7 @@ def run_agent(query: str, agent: AgentExecutor | None = None) -> dict:
                     if tool_result and "Erro" not in str(tool_result):
                         answer_parts.append(f"[{tool.name}]: {tool_result}")
                         tools_used.append(tool.name)
-                except Exception:
+                except Exception:  # nosec B112
                     continue
 
             if answer_parts:

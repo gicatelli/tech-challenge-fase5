@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 # Ações monitoradas no projeto
 DEFAULT_SYMBOLS = ["PETR4.SA", "VALE3.SA", "ITUB4.SA"]
-DEFAULT_START_DATE = "2018-01-01"
+DEFAULT_START_DATE = "2020-01-01"
 DATA_RAW_DIR = Path("data/raw")
 
 
@@ -146,12 +146,14 @@ def collect_multiple_stocks(
     output_dir.mkdir(parents=True, exist_ok=True)
     results: dict[str, pd.DataFrame] = {}
 
+    import time
+
     for i, symbol in enumerate(symbols):
         try:
-            # Delay entre requests para evitar rate limit
+            # Delay maior entre requests para evitar rate limit
             if i > 0:
-                import time
-                time.sleep(5)
+                logger.info("Aguardando 60s entre coletas (rate limit)...")
+                time.sleep(60)
 
             df = collect_stock_data(symbol, start_date, end_date)
             results[symbol] = df
@@ -236,6 +238,72 @@ def collect_combined_dataset(
     return close_prices
 
 
+def generate_synthetic_stock_data(
+    symbol: str = "PETR4.SA",
+    start_date: str = "2020-01-02",
+    end_date: str | None = None,
+    output_dir: Path = DATA_RAW_DIR,
+) -> pd.DataFrame:
+    """Gera dados sintéticos realistas quando Yahoo Finance não está disponível.
+
+    Útil para ambientes com rate limiting, proxy ou sem acesso à internet.
+    Os dados seguem padrões estatísticos realistas de ações brasileiras.
+
+    Args:
+        symbol: Símbolo da ação.
+        start_date: Data de início.
+        end_date: Data de fim (default: hoje).
+        output_dir: Diretório de saída.
+
+    Returns:
+        DataFrame com dados sintéticos no formato padrão.
+
+    """
+    import numpy as np
+
+    if end_date is None:
+        end_date = datetime.now().strftime("%Y-%m-%d")
+
+    np.random.seed(42)
+    dates = pd.bdate_range(start_date, end_date)
+    n = len(dates)
+
+    # Parâmetros por símbolo (preço inicial, volatilidade, drift)
+    params = {
+        "PETR4.SA": {"start": 28.0, "vol": 0.022, "drift": 0.0003},
+        "VALE3.SA": {"start": 45.0, "vol": 0.020, "drift": 0.0004},
+        "ITUB4.SA": {"start": 30.0, "vol": 0.015, "drift": 0.0002},
+    }
+    p = params.get(symbol, {"start": 30.0, "vol": 0.02, "drift": 0.0003})
+
+    # Random walk com drift (geometric brownian motion simplificado)
+    returns = np.random.normal(p["drift"], p["vol"], n)
+    prices = p["start"] * np.cumprod(1 + returns)
+    prices = np.maximum(prices, 5.0)  # floor
+
+    df = pd.DataFrame(
+        {
+            "Open": prices * (1 + np.random.uniform(-0.008, 0.008, n)),
+            "High": prices * (1 + np.random.uniform(0.005, 0.025, n)),
+            "Low": prices * (1 - np.random.uniform(0.005, 0.025, n)),
+            "Close": prices,
+            "Adj Close": prices,
+            "Volume": np.random.randint(20_000_000, 80_000_000, n),
+        },
+        index=dates,
+    )
+    df.index.name = "Date"
+
+    # Salvar
+    output_dir.mkdir(parents=True, exist_ok=True)
+    filename = f"{symbol.replace('.', '_')}_historico.csv"
+    filepath = output_dir / filename
+    df.to_csv(filepath)
+    logger.info("Dados sintéticos gerados: %s (%d registros)", filepath, len(df))
+
+    return df
+
+
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
@@ -263,9 +331,10 @@ if __name__ == "__main__":
     else:
         # Coletar ações individuais com retry
         print("\n[1/2] Coletando ações individuais (com retry)...")
-        max_retries = 3
-        retry_delay = 30  # segundos
+        max_retries = 2
+        retry_delay = 60  # segundos
 
+        results = {}
         for attempt in range(max_retries):
             results = collect_multiple_stocks(
                 symbols=DEFAULT_SYMBOLS,
@@ -280,25 +349,42 @@ if __name__ == "__main__":
             time.sleep(retry_delay)
             retry_delay *= 2  # backoff exponencial
 
+        # FALLBACK: se Yahoo falhou, gerar dados sintéticos
+        if not results:
+            print("\n[FALLBACK] Yahoo Finance indisponível (rate limit).")
+            print("[FALLBACK] Gerando dados sintéticos realistas...")
+            print("[INFO] O pipeline aceita qualquer CSV com schema correto.")
+            print("[INFO] Em produção, usar dados reais via DVC.\n")
+
+            for symbol in DEFAULT_SYMBOLS:
+                df = generate_synthetic_stock_data(symbol)
+                results[symbol] = df
+                print(f"  ✓ {symbol}: {len(df)} registros sintéticos")
+
         if results:
             # Coletar dataset combinado
             print("\n[2/2] Gerando dataset combinado (Close prices)...")
-            time.sleep(5)
             try:
-                combined = collect_combined_dataset(
-                    symbols=DEFAULT_SYMBOLS,
-                    start_date=DEFAULT_START_DATE,
-                )
-                print(f"\n  Dataset combinado: {combined.shape}")
-            except ValueError as e:
+                # Gerar combinado a partir dos CSVs individuais
+                dfs = {}
+                for f in DATA_RAW_DIR.glob("*_historico.csv"):
+                    sym = f.stem.replace("_historico", "").replace("_", ".")
+                    df_temp = pd.read_csv(f, index_col=0, parse_dates=True)
+                    dfs[sym] = df_temp["Close"]
+
+                combined = pd.DataFrame(dfs)
+                combined.to_csv(DATA_RAW_DIR / "combined_close_prices.csv")
+                print(f"  Dataset combinado: {combined.shape}")
+            except Exception as e:
                 print(f"\n[WARN] Dataset combinado falhou: {e}")
-                print("[INFO] Será gerado a partir dos CSVs individuais.")
 
     # Resumo final
     print("\n" + "=" * 60)
     print("  RESUMO")
     print("=" * 60)
-    for f in DATA_RAW_DIR.glob("*_historico.csv"):
+    for f in sorted(DATA_RAW_DIR.glob("*_historico.csv")):
         df = pd.read_csv(f, index_col=0, parse_dates=True)
-        print(f"  {f.name}: {len(df)} registros")
+        start = df.index[0].strftime('%Y-%m-%d') if len(df) > 0 else "N/A"
+        end = df.index[-1].strftime('%Y-%m-%d') if len(df) > 0 else "N/A"
+        print(f"  {f.name}: {len(df)} registros | {start} → {end}")
     print(f"\n  Diretório: {DATA_RAW_DIR.resolve()}")

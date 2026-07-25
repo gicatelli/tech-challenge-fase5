@@ -62,18 +62,12 @@ def collect_stock_data(
 
     logger.info("Coletando dados de %s de %s até %s...", symbol, start_date, end_date)
 
-    # Configurar session sem verificação SSL (ambientes corporativos)
-    import requests
-
-    session = requests.Session()
-    session.verify = False
-
+    # Download sem session customizada (yfinance >= 0.2.40 usa curl_cffi internamente)
     df = yf.download(
         symbol,
         start=start_date,
         end=end_date,
         progress=False,
-        session=session,
     )
 
     if df.empty:
@@ -107,12 +101,7 @@ def get_stock_info(symbol: str = "PETR4.SA") -> dict:
         Dicionário com informações da empresa.
 
     """
-    import requests
-
-    session = requests.Session()
-    session.verify = False
-
-    ticker = yf.Ticker(symbol, session=session)
+    ticker = yf.Ticker(symbol)
     info = ticker.info
 
     return {
@@ -211,14 +200,8 @@ def collect_combined_dataset(
 
     logger.info("Coletando dataset combinado: %s", symbols)
 
-    # Configurar session sem verificação SSL
-    import requests
-
-    session = requests.Session()
-    session.verify = False
-
     # Download em batch (mais eficiente)
-    df_all = yf.download(symbols, start=start_date, end=end_date, progress=False, session=session)
+    df_all = yf.download(symbols, start=start_date, end=end_date, progress=False)
 
     if df_all.empty:
         raise ValueError(f"Nenhum dado encontrado para os símbolos: {symbols}")

@@ -332,8 +332,18 @@ def run_training_pipeline(
         len(X_train_seq), len(X_test_seq), seq_length,
     )
 
-    # Configurar MLflow
-    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000"))
+    # Configurar MLflow (local sqlite se servidor indisponível)
+    mlflow_uri = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+    try:
+        import requests
+        requests.get(mlflow_uri, timeout=3)
+        mlflow.set_tracking_uri(mlflow_uri)
+    except Exception:
+        # Fallback: MLflow local com sqlite
+        local_uri = "sqlite:///mlruns.db"
+        logger.warning("MLflow server indisponível. Usando local: %s", local_uri)
+        mlflow.set_tracking_uri(local_uri)
+
     mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "datathon-fase05"))
 
     # === TREINAR LSTM ===

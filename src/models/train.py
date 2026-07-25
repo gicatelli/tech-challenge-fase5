@@ -144,7 +144,10 @@ def train_lstm(
         mlflow.log_metric("inference_latency_ms", latency_ms)
 
         # Salvar modelo PyTorch
-        mlflow.pytorch.log_model(model, "model")
+        mlflow.pytorch.log_model(
+            model, "model",
+            input_example=X_test_t[:1].cpu().numpy(),
+        )
 
         logger.info(
             "LSTM treinado: MAE=%.4f, RMSE=%.4f, MAPE=%.2f%%, R²=%.4f",

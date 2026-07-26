@@ -322,9 +322,6 @@ def run_training_pipeline(
     features = compute_features(df, validate=False)
     logger.info("Features computadas: %s", features.shape)
 
-    # Separar target ANTES de normalizar (para métricas em escala real)
-    target_values = features["close"].values.copy()
-
     # Normalizar features (incluindo close para input do modelo)
     scaler = MinMaxScaler()
     features_scaled = pd.DataFrame(
@@ -343,17 +340,12 @@ def run_training_pipeline(
         features_scaled, target_col="close", sequence_length=seq_length
     )
 
-    # Target em escala real (para métricas)
-    # y_seq é normalizado (0-1), precisamos do real para calcular métricas
-    y_real = y_seq * (close_max - close_min) + close_min
-
     # Split temporal (80/20)
     split_idx = int(len(X_seq) * 0.8)
     X_train_seq = X_seq[:split_idx]
     X_test_seq = X_seq[split_idx:]
     y_train_seq = y_seq[:split_idx]
     y_test_seq = y_seq[split_idx:]
-    y_test_real = y_real[split_idx:]
 
     # Para RF: usar último timestep de cada sequência (flatten)
     X_train_rf = X_train_seq[:, -1, :]  # (n, features)

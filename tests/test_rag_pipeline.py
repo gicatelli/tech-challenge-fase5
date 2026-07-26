@@ -2,8 +2,6 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from src.agent.rag_pipeline import (
     CHUNK_OVERLAP,
     CHUNK_SIZE,

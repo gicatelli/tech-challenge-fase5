@@ -1,12 +1,9 @@
 """Testes de drift detection — PSI e thresholds."""
 
-import json
-from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from src.monitoring.drift import (
     PSI_CRITICAL_THRESHOLD,

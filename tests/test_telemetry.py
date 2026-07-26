@@ -2,8 +2,7 @@
 
 import json
 import time
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -152,7 +151,8 @@ class TestQueryTracer:
 
                 # Tokens estimados = len(text) // 4
                 assert tracer.record.tokens_input == len("uma pergunta de teste") // 4
-                assert tracer.record.tokens_output == len("uma resposta longa com varias palavras aqui") // 4
+                expected_out = len("uma resposta longa com varias palavras aqui") // 4
+                assert tracer.record.tokens_output == expected_out
 
 
 class TestTraceQuery:
@@ -215,9 +215,12 @@ class TestGetTraceSummary:
 
         traces_file = tmp_path / "query_traces.jsonl"
         traces = [
-            {"query": "q1", "latency_ms": 100, "success": True, "tools_used": ["t1"], "method": "agent"},
-            {"query": "q2", "latency_ms": 200, "success": True, "tools_used": ["t2"], "method": "rag"},
-            {"query": "q3", "latency_ms": 150, "success": False, "tools_used": [], "method": "agent"},
+            {"query": "q1", "latency_ms": 100, "success": True,
+             "tools_used": ["t1"], "method": "agent"},
+            {"query": "q2", "latency_ms": 200, "success": True,
+             "tools_used": ["t2"], "method": "rag"},
+            {"query": "q3", "latency_ms": 150, "success": False,
+             "tools_used": [], "method": "agent"},
         ]
         traces_file.write_text(
             "\n".join(json.dumps(t) for t in traces), encoding="utf-8"

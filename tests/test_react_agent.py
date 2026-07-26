@@ -201,7 +201,10 @@ class TestRunAgent:
 
         result = run_agent("Pergunta qualquer")
 
-        assert "indisponível" in result["answer"].lower() or "não foi possível" in result["answer"].lower()
+        assert (
+            "indisponível" in result["answer"].lower()
+            or "não foi possível" in result["answer"].lower()
+        )
 
     @patch("src.agent.react_agent.trace_query")
     def test_uses_provided_agent(self, mock_trace):

@@ -1,7 +1,6 @@
 """Testes para src/data_collection.py — coleta de dados financeiros."""
 
 import json
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -9,10 +8,10 @@ import pandas as pd
 import pytest
 
 from src.data_collection import (
+    collect_multiple_stocks,
     collect_stock_data,
     generate_synthetic_stock_data,
     get_stock_info,
-    collect_multiple_stocks,
 )
 
 

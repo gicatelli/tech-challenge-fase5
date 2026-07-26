@@ -82,8 +82,6 @@ def evaluate_single_with_llm(
         Dicionário com notas (1-5) por critério.
 
     """
-    import time
-
     # Selecionar LLM disponível (Ollama > Gemini > OpenAI)
     use_ollama = os.getenv("USE_OLLAMA", "true").lower() == "true"
     google_api_key = os.getenv("GOOGLE_API_KEY")

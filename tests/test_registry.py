@@ -1,9 +1,6 @@
 """Testes para src/models/registry.py — Model Registry e governança."""
 
-from datetime import datetime
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from src.models.registry import (
     REQUIRED_TAGS,

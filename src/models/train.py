@@ -148,7 +148,7 @@ def train_lstm(
         mlflow.pytorch.log_model(
             model_cpu, "model",
             input_example=X_test[:1],
-            serialization_format="cloudpickle",
+            serialization_format="pickle",
         )
 
         logger.info(

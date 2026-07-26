@@ -143,10 +143,12 @@ def train_lstm(
         mlflow.log_metrics(metrics)
         mlflow.log_metric("inference_latency_ms", latency_ms)
 
-        # Salvar modelo PyTorch
+        # Salvar modelo PyTorch (formato pickle para compatibilidade)
+        model_cpu = model.cpu()
         mlflow.pytorch.log_model(
-            model, "model",
-            input_example=X_test_t[:1].cpu().numpy(),
+            model_cpu, "model",
+            input_example=X_test[:1],
+            serialization_format="cloudpickle",
         )
 
         logger.info(

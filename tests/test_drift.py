@@ -223,21 +223,21 @@ class TestRunDriftDetection:
         csv_path = tmp_path / "PETR4_SA_historico.csv"
         sample_ohlcv.to_csv(csv_path)
 
-        # Criar diretório metrics
+        # Criar diretório metrics para output
         metrics_dir = tmp_path / "metrics"
         metrics_dir.mkdir()
 
-        with patch("src.monitoring.drift.Path") as mock_path:
-            # Mock para que o report seja salvo no tmp
-            mock_path.return_value = metrics_dir / "drift_report.json"
-            mock_path.return_value.parent = metrics_dir
-            mock_path.return_value.parent.mkdir = lambda **kw: None
-
+        import os
+        old_cwd = os.getcwd()
+        os.chdir(tmp_path)
+        try:
             result = run_drift_detection(
                 data_path=str(csv_path),
                 reference_months=4,
                 current_months=1,
             )
+        finally:
+            os.chdir(old_cwd)
 
         assert "status" in result
         assert "psi_by_feature" in result

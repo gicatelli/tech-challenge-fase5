@@ -53,7 +53,7 @@ def evaluate_with_ragas(
     golden_set: list[dict],
     rag_fn,
 ) -> dict[str, float]:
-    """Avalia pipeline RAG com RAGAS (requer OpenAI API key).
+    """Avalia pipeline RAG com RAGAS oficial (usando Gemini ou OpenAI).
 
     Args:
         golden_set: Lista de pares query/expected_answer/contexts.
@@ -63,6 +63,8 @@ def evaluate_with_ragas(
         Dicionário com 4 métricas RAGAS.
 
     """
+    import time
+
     from datasets import Dataset
     from ragas import evaluate
     from ragas.metrics import (
@@ -70,6 +72,28 @@ def evaluate_with_ragas(
         context_precision,
         context_recall,
         faithfulness,
+    )
+
+    # Configurar LLM para RAGAS (Gemini ou OpenAI)
+    google_api_key = os.getenv("GOOGLE_API_KEY")
+    llm = None
+    embeddings = None
+
+    if google_api_key:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+
+        llm = ChatGoogleGenerativeAI(
+            model=os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash"),
+            google_api_key=google_api_key,
+            temperature=0.0,
+        )
+
+    # Embeddings locais para RAGAS
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+
+    embeddings = HuggingFaceEmbeddings(
+        model_name="all-MiniLM-L6-v2",
+        model_kwargs={"device": "cpu"},
     )
 
     # Gerar respostas do pipeline
@@ -83,14 +107,21 @@ def evaluate_with_ragas(
             "contexts": contexts,
             "ground_truth": item["expected_answer"],
         })
+        time.sleep(1)  # Rate limit
 
     dataset = Dataset.from_list(results)
 
     # Avaliação RAGAS — 4 métricas obrigatórias
-    scores = evaluate(
-        dataset,
-        metrics=[faithfulness, answer_relevancy, context_precision, context_recall],
-    )
+    eval_kwargs = {
+        "dataset": dataset,
+        "metrics": [faithfulness, answer_relevancy, context_precision, context_recall],
+    }
+    if llm:
+        eval_kwargs["llm"] = llm
+    if embeddings:
+        eval_kwargs["embeddings"] = embeddings
+
+    scores = evaluate(**eval_kwargs)
 
     return {
         "faithfulness": float(scores["faithfulness"]),
@@ -237,12 +268,12 @@ def run_evaluation(
     use_ragas = os.getenv("OPENAI_API_KEY") is not None or os.getenv("GOOGLE_API_KEY") is not None
 
     if use_ragas:
-        logger.info("Usando RAGAS (OpenAI disponível)")
+        logger.info("Usando RAGAS oficial (LLM disponível)")
         try:
             metrics = evaluate_with_ragas(golden_set, rag_fn_with_fallback)
-            method = "ragas"
+            method = "ragas_official"
         except Exception as e:
-            logger.warning("RAGAS falhou (%s), usando semantic similarity", e)
+            logger.warning("RAGAS oficial falhou (%s), usando semantic similarity", e)
             metrics = evaluate_with_proxy_metrics(golden_set, rag_fn_with_fallback)
             method = "semantic_similarity"
     else:

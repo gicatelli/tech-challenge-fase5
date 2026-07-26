@@ -38,7 +38,17 @@ logger = logging.getLogger(__name__)
 
 # Guardrails
 input_guardrail = InputGuardrail()
-output_guardrail = OutputGuardrail()
+
+# Output guardrail (lazy - inicializado no primeiro uso)
+_output_guardrail = None
+
+
+def get_output_guardrail() -> OutputGuardrail:
+    """Lazy initialization do OutputGuardrail."""
+    global _output_guardrail
+    if _output_guardrail is None:
+        _output_guardrail = OutputGuardrail()
+    return _output_guardrail
 
 # Agent (lazy init — requer OPENAI_API_KEY)
 _agent = None
@@ -158,7 +168,7 @@ async def query_agent(request: QueryRequest):
             steps = 0
 
         # Guardrail de output (PII removal)
-        answer = output_guardrail.sanitize(answer)
+        answer = get_output_guardrail().sanitize(answer)
 
         latency_ms = (time.time() - start_time) * 1000
 

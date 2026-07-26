@@ -1,0 +1,48 @@
+POLÍTICA DE DIVIDENDOS DA PETROBRAS (PETR4)
+
+Política Atual de Dividendos
+A Petrobras possui uma das políticas de dividendos mais agressivas do mundo. A empresa distribui no mínimo 45% do fluxo de caixa livre (FCL) aos acionistas, em forma de dividendos ordinários e extraordinários. Em 2023 e 2024, a empresa pagou dividend yield superior a 15%, tornando-a uma das maiores pagadoras de dividendos do mundo.
+
+Fórmula de Cálculo
+O dividendo mínimo é calculado como:
+- Dividendo = 45% × (Fluxo de Caixa Operacional - Investimentos)
+- Se a dívida bruta estiver abaixo de USD 65 bilhões, pode distribuir até 60%
+- Dividendos extraordinários são decididos pelo Conselho caso haja excesso de caixa
+
+Histórico de Pagamentos (por ação PETR4)
+- 2024: R$ 6,40/ação (dividend yield ~16%)
+- 2023: R$ 5,90/ação (dividend yield ~18%)
+- 2022: R$ 16,70/ação (excepcional, yield ~50%)
+- 2021: R$ 7,20/ação
+- 2020: R$ 1,50/ação (impacto COVID)
+
+Datas Importantes
+A Petrobras paga dividendos trimestralmente. As datas-chave são:
+- Data de declaração: quando o Conselho aprova
+- Data ex-dividendos: quem compra a partir desta data não recebe
+- Data de pagamento: efetivação do crédito
+
+Fatores que Afetam os Dividendos
+- Preço do petróleo (Brent): quanto maior, mais lucro, mais dividendo
+- Produção do pré-sal: crescimento aumenta FCL
+- CAPEX (investimentos): investimentos altos reduzem FCL disponível
+- Dívida: endividamento acima do teto reduz distribuição
+- Política governamental: governo como acionista majoritário pode influenciar
+
+Riscos para o Investidor de Dividendos
+- Volatilidade do petróleo: queda no Brent reduz lucro e dividendos
+- Interferência política: governo pode priorizar investimento sobre distribuição
+- Mudança na política: novo management pode alterar o percentual mínimo
+- Câmbio: receitas em USD mas dividendos em BRL
+
+Comparação com Pares
+- Petrobras: ~15-18% yield
+- Shell: ~4% yield
+- ExxonMobil: ~3.5% yield
+- TotalEnergies: ~5% yield
+A Petrobras paga significativamente mais que seus pares internacionais.
+
+Impacto no Preço de PETR4
+Anúncio de dividendos elevados → alta no curto prazo
+Corte de dividendos → queda acentuada
+Data ex-dividendos → ajuste técnico para baixo (normal)

@@ -1,0 +1,50 @@
+GOVERNANÇA E ESG — PETROBRAS (PETR4)
+
+Estrutura de Governança
+A Petrobras é uma empresa de capital misto (sociedade de economia mista). O governo federal é acionista controlador com 36.6% das ações ordinárias. A empresa é listada na B3 (Brasil), NYSE (EUA) e TSE (Espanha).
+
+Conselho de Administração
+- 11 membros, sendo 7 indicados pela União
+- Presidente do CA é indicação do governo
+- 3 membros independentes (exigência de governança)
+- Comitês: Auditoria, Remuneração, Segurança, Minoritários
+
+Melhorias Pós-Lava Jato
+Após os escândalos de corrupção (2014-2016), a Petrobras implementou:
+- Lei das Estatais (Lei 13.303/2016): requisitos mínimos para diretores
+- Compliance Officer independente
+- Canal de denúncias
+- Due diligence em fornecedores
+- Segregação de poderes no comitê de investimentos
+
+ESG (Environmental, Social, Governance)
+Ambiental:
+- Meta de redução de 30% nas emissões operacionais até 2030
+- Investimento em captura de carbono (CCUS)
+- Programa de restauração ambiental
+- Monitoramento de biodiversidade marinha
+
+Social:
+- Programa de desenvolvimento de fornecedores locais
+- Investimento em educação (Programa Petrobras Cultural)
+- Segurança operacional (meta zero acidentes fatais)
+- Diversidade e inclusão (meta 25% mulheres em liderança até 2030)
+
+Governança:
+- Rating ISS: 3/10 (baixo, por interferência governamental)
+- CDP Climate: B (acima da média do setor)
+- MSCI ESG: BBB (média)
+- Sustainability Yearbook: não incluída (2024)
+
+Impacto no Preço de PETR4
+- Melhoria em governança → redução do desconto de risco → alta
+- Interferência política → aumento do desconto → queda
+- Metas ESG ambiciosas → atraem investidores estrangeiros → alta
+- Acidentes ambientais → multas + reputação → queda
+
+Fatores LGPD
+A Petrobras trata dados pessoais de:
+- 45.000+ funcionários
+- 300.000+ fornecedores cadastrados
+- Investidores (dados de acionistas)
+Conformidade com LGPD é obrigatória e monitorada pela ANPD.

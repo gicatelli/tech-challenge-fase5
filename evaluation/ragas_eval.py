@@ -104,64 +104,70 @@ def evaluate_with_proxy_metrics(
     golden_set: list[dict],
     rag_fn,
 ) -> dict[str, float]:
-    """Avalia com métricas proxy (sem OpenAI, funciona offline).
+    """Avalia com similaridade semântica (sentence-transformers).
 
-    Calcula métricas aproximadas baseadas em overlap de tokens:
-    - faithfulness_proxy: % de palavras da resposta presentes nos contextos
-    - relevancy_proxy: % de palavras da query presentes na resposta
-    - precision_proxy: % de contextos que contêm palavras da resposta esperada
-    - recall_proxy: % de palavras da resposta esperada cobertas pelos contextos
+    Usa embeddings neurais para calcular métricas de qualidade do RAG,
+    seguindo a mesma lógica conceitual do RAGAS mas com modelo local.
+
+    Métricas:
+    - faithfulness: cosine similarity entre resposta e contextos
+    - relevancy: cosine similarity entre query e resposta
+    - precision: cosine similarity entre expected answer e contextos
+    - recall: coverage semântica dos contextos vs expected answer
 
     Args:
         golden_set: Lista de pares query/expected_answer/contexts.
         rag_fn: Função que recebe query e retorna (answer, contexts).
 
     Returns:
-        Dicionário com 4 métricas proxy.
+        Dicionário com 4 métricas (0-1).
 
     """
+    from sentence_transformers import SentenceTransformer, util
+
+    # Carregar modelo de embeddings (mesmo usado no RAG)
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+
     faithfulness_scores = []
     relevancy_scores = []
     precision_scores = []
     recall_scores = []
 
     for i, item in enumerate(golden_set):
-        logger.info("Avaliando (proxy) %d/%d", i + 1, len(golden_set))
+        logger.info("Avaliando (semantic) %d/%d", i + 1, len(golden_set))
         answer, contexts = rag_fn(item["query"])
 
-        answer_words = set(answer.lower().split())
-        query_words = set(item["query"].lower().split())
-        expected_words = set(item["expected_answer"].lower().split())
-        context_words = set(" ".join(contexts).lower().split()) if contexts else set()
+        # Embeddings
+        query_emb = model.encode(item["query"], convert_to_tensor=True)
+        answer_emb = model.encode(answer, convert_to_tensor=True)
+        expected_emb = model.encode(item["expected_answer"], convert_to_tensor=True)
 
-        # Faithfulness: palavras da resposta que estão nos contextos
-        if answer_words:
-            faith = len(answer_words & context_words) / len(answer_words)
-            faithfulness_scores.append(min(faith, 1.0))
+        # Faithfulness: resposta é fiel aos contextos?
+        if contexts:
+            ctx_embs = model.encode(contexts, convert_to_tensor=True)
+            faith_scores = util.cos_sim(answer_emb, ctx_embs)[0]
+            faithfulness_scores.append(float(faith_scores.max().clamp(0, 1)))
         else:
             faithfulness_scores.append(0.0)
 
-        # Relevancy: palavras da query presentes na resposta
-        if query_words:
-            rel = len(query_words & answer_words) / len(query_words)
-            relevancy_scores.append(min(rel * 2, 1.0))  # Scale up
-        else:
-            relevancy_scores.append(0.0)
+        # Answer Relevancy: resposta é relevante à pergunta?
+        rel_score = float(util.cos_sim(query_emb, answer_emb)[0][0].clamp(0, 1))
+        relevancy_scores.append(rel_score)
 
-        # Precision: contextos que contêm palavras da expected answer
-        if contexts and expected_words:
-            relevant_ctx = sum(
-                1 for ctx in contexts
-                if len(set(ctx.lower().split()) & expected_words) > 3
-            )
-            precision_scores.append(relevant_ctx / len(contexts))
+        # Context Precision: contextos são relevantes ao expected?
+        if contexts:
+            ctx_embs = model.encode(contexts, convert_to_tensor=True)
+            prec_scores = util.cos_sim(expected_emb, ctx_embs)[0]
+            precision_scores.append(float(prec_scores.mean().clamp(0, 1)))
         else:
             precision_scores.append(0.0)
 
-        # Recall: palavras da expected answer cobertas pelos contextos
-        if expected_words and context_words:
-            rec = len(expected_words & context_words) / len(expected_words)
-            recall_scores.append(min(rec, 1.0))
+        # Context Recall: contextos cobrem o expected?
+        if contexts:
+            ctx_combined = " ".join(contexts)
+            ctx_combined_emb = model.encode(ctx_combined, convert_to_tensor=True)
+            recall_score = float(util.cos_sim(expected_emb, ctx_combined_emb)[0][0].clamp(0, 1))
+            recall_scores.append(recall_score)
         else:
             recall_scores.append(0.0)
 
@@ -236,13 +242,13 @@ def run_evaluation(
             metrics = evaluate_with_ragas(golden_set, rag_fn_with_fallback)
             method = "ragas"
         except Exception as e:
-            logger.warning("RAGAS falhou (%s), usando proxy", e)
+            logger.warning("RAGAS falhou (%s), usando semantic similarity", e)
             metrics = evaluate_with_proxy_metrics(golden_set, rag_fn_with_fallback)
-            method = "proxy"
+            method = "semantic_similarity"
     else:
-        logger.info("Usando métricas proxy (OpenAI indisponível)")
+        logger.info("Usando avaliação por similaridade semântica (sentence-transformers)")
         metrics = evaluate_with_proxy_metrics(golden_set, rag_fn_with_fallback)
-        method = "proxy"
+        method = "semantic_similarity"
 
     # Adicionar metadata
     result = {

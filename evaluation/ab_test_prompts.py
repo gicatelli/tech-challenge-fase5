@@ -75,18 +75,34 @@ def run_single_query_with_config(
     start_time = time.time()
 
     try:
-        # Tentar usar RAG pipeline completo (requer OpenAI)
+        # Tentar usar RAG pipeline completo com LLM (Gemini ou OpenAI)
         from src.agent.rag_pipeline import retrieve_context
 
         contexts = retrieve_context(query, top_k=top_k)
-        # Gerar com temperature customizada
-        from langchain_openai import ChatOpenAI
 
-        llm = ChatOpenAI(
-            model=os.getenv("LLM_MODEL_NAME", "gpt-4o-mini"),
-            temperature=temperature,
-            api_key=os.getenv("OPENAI_API_KEY"),  # type: ignore[arg-type]
-        )
+        # Selecionar LLM disponível
+        google_api_key = os.getenv("GOOGLE_API_KEY")
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+
+        if google_api_key:
+            from langchain_google_genai import ChatGoogleGenerativeAI
+
+            llm = ChatGoogleGenerativeAI(
+                model=os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash"),
+                google_api_key=google_api_key,
+                temperature=temperature,
+            )
+        elif openai_api_key:
+            from langchain_openai import ChatOpenAI
+
+            llm = ChatOpenAI(
+                model=os.getenv("LLM_MODEL_NAME", "gpt-4o-mini"),
+                temperature=temperature,
+                api_key=openai_api_key,  # type: ignore[arg-type]
+            )
+        else:
+            raise ValueError("Nenhum LLM disponível")
+
         context_text = "\n\n".join(
             [f"Contexto {i+1}: {ctx}" for i, ctx in enumerate(contexts)]
         )
@@ -94,6 +110,9 @@ def run_single_query_with_config(
             "Com base nos contextos fornecidos, responda a pergunta.\n\n"
             f"{context_text}\n\nPergunta: {query}\n\nResposta:"
         )
+
+        # Rate limit
+        time.sleep(4)
         response = llm.invoke(prompt)
         answer = str(response.content)
         method = "rag_llm"

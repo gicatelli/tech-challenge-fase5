@@ -74,12 +74,21 @@ def evaluate_with_ragas(
         faithfulness,
     )
 
-    # Configurar LLM para RAGAS (Gemini ou OpenAI)
+    # Configurar LLM para RAGAS (Ollama > Gemini > OpenAI)
+    use_ollama = os.getenv("USE_OLLAMA", "true").lower() == "true"
     google_api_key = os.getenv("GOOGLE_API_KEY")
     llm = None
     embeddings = None
 
-    if google_api_key:
+    if use_ollama:
+        from langchain_community.chat_models import ChatOllama
+
+        llm = ChatOllama(
+            model=os.getenv("OLLAMA_MODEL", "qwen2.5:3b"),
+            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+            temperature=0.0,
+        )
+    elif google_api_key:
         from langchain_google_genai import ChatGoogleGenerativeAI
 
         llm = ChatGoogleGenerativeAI(
@@ -265,7 +274,11 @@ def run_evaluation(
     golden_set = load_golden_set(golden_set_path)
 
     # Determinar método de avaliação
-    use_ragas = os.getenv("OPENAI_API_KEY") is not None or os.getenv("GOOGLE_API_KEY") is not None
+    use_ragas = (
+        os.getenv("USE_OLLAMA", "true").lower() == "true"
+        or os.getenv("OPENAI_API_KEY") is not None
+        or os.getenv("GOOGLE_API_KEY") is not None
+    )
 
     if use_ragas:
         logger.info("Usando RAGAS oficial (LLM disponível)")

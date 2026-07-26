@@ -75,12 +75,41 @@ def create_datathon_agent(
     if model_name is None:
         model_name = os.getenv("LLM_MODEL_NAME", "gpt-4o-mini")
 
-    # Tentar Gemini primeiro (gratuito), depois OpenAI
+    # Tentar LLM local (Ollama) primeiro, depois Gemini, depois OpenAI
+    ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     google_api_key = os.getenv("GOOGLE_API_KEY")
     openai_api_key = os.getenv("OPENAI_API_KEY")
 
     llm: object  # type: ignore[assignment]
-    if google_api_key:
+    if os.getenv("USE_OLLAMA", "true").lower() == "true":
+        try:
+            from langchain_community.chat_models import ChatOllama
+
+            llm = ChatOllama(
+                model=os.getenv("OLLAMA_MODEL", "qwen2.5:3b"),
+                base_url=ollama_url,
+                temperature=temperature,
+            )
+            logger.info("Usando Ollama local: %s", os.getenv("OLLAMA_MODEL", "qwen2.5:3b"))
+        except Exception as e:
+            logger.warning("Ollama falhou (%s), tentando alternativas", e)
+            if google_api_key:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+
+                llm = ChatGoogleGenerativeAI(
+                    model=os.getenv("GEMINI_MODEL_NAME", "gemini-2.0-flash"),
+                    api_key=google_api_key,  # type: ignore[arg-type]
+                    temperature=temperature,
+                )
+            elif openai_api_key:
+                llm = ChatOpenAI(  # type: ignore[assignment]
+                    model=model_name,
+                    temperature=temperature,
+                    api_key=openai_api_key,  # type: ignore[arg-type]
+                )
+            else:
+                raise ValueError("Nenhum LLM disponível (Ollama, Gemini ou OpenAI)")
+    elif google_api_key:
         from langchain_google_genai import ChatGoogleGenerativeAI
 
         llm = ChatGoogleGenerativeAI(
@@ -98,7 +127,7 @@ def create_datathon_agent(
         logger.info("Usando OpenAI: %s", model_name)
     else:
         raise ValueError(
-            "Nenhum LLM configurado. Defina GOOGLE_API_KEY ou OPENAI_API_KEY."
+            "Nenhum LLM configurado. Defina USE_OLLAMA=true, GOOGLE_API_KEY ou OPENAI_API_KEY."
         )
 
     agent = create_react_agent(llm=llm, tools=tools, prompt=REACT_PROMPT)

@@ -84,16 +84,25 @@ def evaluate_single_with_llm(
     """
     import time
 
-    # Selecionar LLM disponível
+    # Selecionar LLM disponível (Ollama > Gemini > OpenAI)
+    use_ollama = os.getenv("USE_OLLAMA", "true").lower() == "true"
     google_api_key = os.getenv("GOOGLE_API_KEY")
     openai_api_key = os.getenv("OPENAI_API_KEY")
 
-    if google_api_key:
+    if use_ollama:
+        from langchain_community.chat_models import ChatOllama
+
+        llm = ChatOllama(
+            model=os.getenv("OLLAMA_MODEL", "qwen2.5:3b"),
+            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+            temperature=0.0,
+        )
+    elif google_api_key:
         from langchain_google_genai import ChatGoogleGenerativeAI
 
         llm = ChatGoogleGenerativeAI(
             model=os.getenv("GEMINI_MODEL_NAME", "gemini-2.0-flash"),
-            google_api_key=google_api_key,
+            api_key=google_api_key,  # type: ignore[arg-type]
             temperature=0.0,
         )
     elif openai_api_key:
@@ -226,7 +235,11 @@ def run_llm_judge(
     with open(golden_set_path, encoding="utf-8") as f:
         golden_set = json.load(f)
 
-    use_llm = os.getenv("GOOGLE_API_KEY") is not None or os.getenv("OPENAI_API_KEY") is not None
+    use_llm = (
+        os.getenv("USE_OLLAMA", "true").lower() == "true"
+        or os.getenv("GOOGLE_API_KEY") is not None
+        or os.getenv("OPENAI_API_KEY") is not None
+    )
     method = "llm_judge" if use_llm else "semantic_similarity"
     logger.info("Método: %s | Golden set: %d pares", method, len(golden_set))
 

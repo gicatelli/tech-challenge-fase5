@@ -174,9 +174,34 @@ def generate_answer(query: str, contexts: list[str]) -> str:
     """
     context_text = "\n\n".join([f"Contexto {i+1}: {ctx}" for i, ctx in enumerate(contexts)])
 
-    # Tentar usar LLM (Gemini ou OpenAI)
+    # Tentar usar LLM (Ollama local > Gemini > OpenAI)
     google_api_key = os.getenv("GOOGLE_API_KEY", "")
     api_key = os.getenv("OPENAI_API_KEY", "")
+    use_ollama = os.getenv("USE_OLLAMA", "true").lower() == "true"
+
+    if use_ollama:
+        try:
+            from langchain_community.chat_models import ChatOllama
+
+            llm_local = ChatOllama(
+                model=os.getenv("OLLAMA_MODEL", "qwen2.5:3b"),
+                base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+                temperature=0.0,
+            )
+
+            prompt = f"""Com base nos contextos fornecidos, responda a pergunta do usuário.
+Se a informação não estiver nos contextos, diga claramente que não encontrou.
+
+{context_text}
+
+Pergunta: {query}
+
+Resposta:"""
+
+            response = llm_local.invoke(prompt)
+            return response.content  # type: ignore[return-value]
+        except Exception as e:
+            logger.warning("Ollama falhou (%s), tentando alternativas", e)
 
     if google_api_key:
         try:

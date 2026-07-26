@@ -80,11 +80,20 @@ def run_single_query_with_config(
 
         contexts = retrieve_context(query, top_k=top_k)
 
-        # Selecionar LLM disponível
+        # Selecionar LLM disponível (Ollama > Gemini > OpenAI)
+        use_ollama = os.getenv("USE_OLLAMA", "true").lower() == "true"
         google_api_key = os.getenv("GOOGLE_API_KEY")
         openai_api_key = os.getenv("OPENAI_API_KEY")
 
-        if google_api_key:
+        if use_ollama:
+            from langchain_community.chat_models import ChatOllama
+
+            llm = ChatOllama(
+                model=os.getenv("OLLAMA_MODEL", "qwen2.5:3b"),
+                base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+                temperature=temperature,
+            )
+        elif google_api_key:
             from langchain_google_genai import ChatGoogleGenerativeAI
 
             llm = ChatGoogleGenerativeAI(

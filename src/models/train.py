@@ -79,15 +79,19 @@ def train_lstm(
     X_test: np.ndarray,
     y_test: np.ndarray,
     config: dict,
+    close_min: float = 0.0,
+    close_max: float = 1.0,
 ) -> tuple[str, dict[str, float], float]:
     """Treina LSTM e loga no MLflow.
 
     Args:
         X_train: Sequências de treino (n, seq_len, features).
-        y_train: Target de treino.
+        y_train: Target de treino (normalizado).
         X_test: Sequências de teste.
-        y_test: Target de teste.
+        y_test: Target de teste (normalizado).
         config: Configurações do modelo.
+        close_min: Mínimo do close para desnormalizar.
+        close_max: Máximo do close para desnormalizar.
 
     Returns:
         Tupla (run_id, metrics, latency_ms).
@@ -134,11 +138,15 @@ def train_lstm(
         start_time = time.time()
         with torch.no_grad():
             X_test_t = torch.FloatTensor(X_test).to(device)
-            y_pred = model(X_test_t).cpu().numpy().flatten()
+            y_pred_norm = model(X_test_t).cpu().numpy().flatten()
         latency_ms = (time.time() - start_time) * 1000 / len(X_test)
 
-        # Métricas
-        metrics = compute_regression_metrics(y_test, y_pred)
+        # Desnormalizar para escala real (R$)
+        y_pred_real = y_pred_norm * (close_max - close_min) + close_min
+        y_test_real = y_test * (close_max - close_min) + close_min
+
+        # Métricas em escala real
+        metrics = compute_regression_metrics(y_test_real, y_pred_real)
         metrics["val_loss"] = val_loss
         mlflow.log_metrics(metrics)
         mlflow.log_metric("inference_latency_ms", latency_ms)
@@ -152,7 +160,7 @@ def train_lstm(
         )
 
         logger.info(
-            "LSTM treinado: MAE=%.4f, RMSE=%.4f, MAPE=%.2f%%, R²=%.4f",
+            "LSTM treinado: MAE=R$%.2f, RMSE=R$%.2f, MAPE=%.2f%%, R²=%.4f",
             metrics["mae"], metrics["rmse"], metrics["mape"], metrics["r2"],
         )
 
@@ -165,15 +173,19 @@ def train_random_forest_regressor(
     X_test: np.ndarray,
     y_test: np.ndarray,
     config: dict,
+    close_min: float = 0.0,
+    close_max: float = 1.0,
 ) -> tuple[str, dict[str, float], float]:
     """Treina Random Forest Regressor e loga no MLflow.
 
     Args:
         X_train: Features de treino (2D — último timestep da sequência).
-        y_train: Target de treino.
+        y_train: Target de treino (normalizado).
         X_test: Features de teste.
-        y_test: Target de teste.
+        y_test: Target de teste (normalizado).
         config: Configurações do modelo.
+        close_min: Mínimo do close para desnormalizar.
+        close_max: Máximo do close para desnormalizar.
 
     Returns:
         Tupla (run_id, metrics, latency_ms).
@@ -209,11 +221,15 @@ def train_random_forest_regressor(
 
         # Inferência
         start_time = time.time()
-        y_pred = model.predict(X_test)
+        y_pred_norm = model.predict(X_test)
         latency_ms = (time.time() - start_time) * 1000 / len(X_test)
 
-        # Métricas
-        metrics = compute_regression_metrics(y_test, y_pred)
+        # Desnormalizar para escala real (R$)
+        y_pred_real = y_pred_norm * (close_max - close_min) + close_min
+        y_test_real = y_test * (close_max - close_min) + close_min
+
+        # Métricas em escala real
+        metrics = compute_regression_metrics(y_test_real, y_pred_real)
         mlflow.log_metrics(metrics)
         mlflow.log_metric("inference_latency_ms", latency_ms)
 
@@ -221,7 +237,7 @@ def train_random_forest_regressor(
         mlflow.sklearn.log_model(model, "model")
 
         logger.info(
-            "RandomForest treinado: MAE=%.4f, RMSE=%.4f, MAPE=%.2f%%, R²=%.4f",
+            "RandomForest treinado: MAE=R$%.2f, RMSE=R$%.2f, MAPE=%.2f%%, R²=%.4f",
             metrics["mae"], metrics["rmse"], metrics["mape"], metrics["r2"],
         )
 
@@ -306,7 +322,10 @@ def run_training_pipeline(
     features = compute_features(df, validate=False)
     logger.info("Features computadas: %s", features.shape)
 
-    # Normalizar
+    # Separar target ANTES de normalizar (para métricas em escala real)
+    target_values = features["close"].values.copy()
+
+    # Normalizar features (incluindo close para input do modelo)
     scaler = MinMaxScaler()
     features_scaled = pd.DataFrame(
         scaler.fit_transform(features),
@@ -314,10 +333,19 @@ def run_training_pipeline(
         index=features.index,
     )
 
+    # Salvar scaler params do close para desnormalizar predições
+    close_idx = features.columns.get_loc("close")
+    close_min = scaler.data_min_[close_idx]
+    close_max = scaler.data_max_[close_idx]
+
     # Preparar sequências para LSTM
     X_seq, y_seq = prepare_sequences(
         features_scaled, target_col="close", sequence_length=seq_length
     )
+
+    # Target em escala real (para métricas)
+    # y_seq é normalizado (0-1), precisamos do real para calcular métricas
+    y_real = y_seq * (close_max - close_min) + close_min
 
     # Split temporal (80/20)
     split_idx = int(len(X_seq) * 0.8)
@@ -325,6 +353,7 @@ def run_training_pipeline(
     X_test_seq = X_seq[split_idx:]
     y_train_seq = y_seq[:split_idx]
     y_test_seq = y_seq[split_idx:]
+    y_test_real = y_real[split_idx:]
 
     # Para RF: usar último timestep de cada sequência (flatten)
     X_train_rf = X_train_seq[:, -1, :]  # (n, features)
@@ -354,13 +383,15 @@ def run_training_pipeline(
     # === TREINAR LSTM ===
     logger.info("Treinando LSTM...")
     lstm_run_id, lstm_metrics, lstm_latency = train_lstm(
-        X_train_seq, y_train_seq, X_test_seq, y_test_seq, config
+        X_train_seq, y_train_seq, X_test_seq, y_test_seq, config,
+        close_min=close_min, close_max=close_max,
     )
 
     # === TREINAR RANDOM FOREST ===
     logger.info("Treinando Random Forest...")
     rf_run_id, rf_metrics, rf_latency = train_random_forest_regressor(
-        X_train_rf, y_train_rf, X_test_rf, y_test_rf, config
+        X_train_rf, y_train_rf, X_test_rf, y_test_rf, config,
+        close_min=close_min, close_max=close_max,
     )
 
     # === COMPARAR E SELECIONAR CHAMPION ===

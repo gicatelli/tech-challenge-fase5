@@ -16,10 +16,10 @@ lint:
 	mypy src/ --ignore-missing-imports
 
 test:
-	pytest tests/ -x --cov=src --cov-report=term-missing --cov-fail-under=30
+	pytest tests/ -x --cov=src --cov-report=term-missing --cov-fail-under=60
 
 test-ci:
-	pytest tests/ -x --cov=src --cov-report=xml --cov-fail-under=30 --junitxml=test-results.xml
+	pytest tests/ -x --cov=src --cov-report=xml --cov-fail-under=60 --junitxml=test-results.xml
 
 train:
 	python -m src.models.train

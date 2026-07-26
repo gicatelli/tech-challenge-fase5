@@ -75,12 +75,30 @@ def create_datathon_agent(
     if model_name is None:
         model_name = os.getenv("LLM_MODEL_NAME", "gpt-4o-mini")
 
-    llm = ChatOpenAI(
-        model=model_name,
-        temperature=temperature,
-        # Tipagem do langchain aceita SecretStr, mas str funciona em runtime
-        api_key=os.getenv("OPENAI_API_KEY"),  # type: ignore[arg-type]
-    )
+    # Tentar Gemini primeiro (gratuito), depois OpenAI
+    google_api_key = os.getenv("GOOGLE_API_KEY")
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+
+    if google_api_key:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+
+        llm = ChatGoogleGenerativeAI(
+            model=os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash"),
+            google_api_key=google_api_key,
+            temperature=temperature,
+        )
+        logger.info("Usando Gemini: %s", os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash"))
+    elif openai_api_key:
+        llm = ChatOpenAI(
+            model=model_name,
+            temperature=temperature,
+            api_key=openai_api_key,  # type: ignore[arg-type]
+        )
+        logger.info("Usando OpenAI: %s", model_name)
+    else:
+        raise ValueError(
+            "Nenhum LLM configurado. Defina GOOGLE_API_KEY ou OPENAI_API_KEY."
+        )
 
     agent = create_react_agent(llm=llm, tools=tools, prompt=REACT_PROMPT)
 

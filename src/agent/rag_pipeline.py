@@ -174,9 +174,35 @@ def generate_answer(query: str, contexts: list[str]) -> str:
     """
     context_text = "\n\n".join([f"Contexto {i+1}: {ctx}" for i, ctx in enumerate(contexts)])
 
-    # Tentar usar OpenAI
+    # Tentar usar LLM (Gemini ou OpenAI)
+    google_api_key = os.getenv("GOOGLE_API_KEY", "")
     api_key = os.getenv("OPENAI_API_KEY", "")
-    if api_key and not api_key.startswith("sk-proj-PLACEHOLDER"):
+
+    if google_api_key:
+        try:
+            from langchain_google_genai import ChatGoogleGenerativeAI
+
+            llm = ChatGoogleGenerativeAI(
+                model=os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash"),
+                google_api_key=google_api_key,
+                temperature=0.0,
+            )
+
+            prompt = f"""Com base nos contextos fornecidos, responda a pergunta do usuário.
+Se a informação não estiver nos contextos, diga claramente que não encontrou.
+
+{context_text}
+
+Pergunta: {query}
+
+Resposta:"""
+
+            response = llm.invoke(prompt)
+            return response.content  # type: ignore[return-value]
+        except Exception as e:
+            logger.warning("Gemini falhou (%s), usando resposta baseada em contexto", e)
+
+    elif api_key and not api_key.startswith("sk-proj-PLACEHOLDER"):
         try:
             from langchain_openai import ChatOpenAI
 

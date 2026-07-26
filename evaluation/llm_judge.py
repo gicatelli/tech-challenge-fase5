@@ -71,7 +71,7 @@ def evaluate_single_with_llm(
     answer: str,
     ground_truth: str,
 ) -> dict:
-    """Avalia uma resposta usando LLM como juiz.
+    """Avalia uma resposta usando LLM como juiz (Gemini ou OpenAI).
 
     Args:
         question: Pergunta original.
@@ -82,13 +82,30 @@ def evaluate_single_with_llm(
         Dicionário com notas (1-5) por critério.
 
     """
-    from langchain_openai import ChatOpenAI
+    import time
 
-    llm = ChatOpenAI(
-        model=os.getenv("LLM_MODEL_NAME", "gpt-4o-mini"),
-        temperature=0.0,
-        api_key=os.getenv("OPENAI_API_KEY"),  # type: ignore[arg-type]
-    )
+    # Selecionar LLM disponível
+    google_api_key = os.getenv("GOOGLE_API_KEY")
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+
+    if google_api_key:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+
+        llm = ChatGoogleGenerativeAI(
+            model=os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash"),
+            google_api_key=google_api_key,
+            temperature=0.0,
+        )
+    elif openai_api_key:
+        from langchain_openai import ChatOpenAI
+
+        llm = ChatOpenAI(
+            model=os.getenv("LLM_MODEL_NAME", "gpt-4o-mini"),
+            temperature=0.0,
+            api_key=openai_api_key,  # type: ignore[arg-type]
+        )
+    else:
+        raise ValueError("Nenhum LLM configurado para judge")
 
     prompt = JUDGE_PROMPT.format(
         question=question,
@@ -96,12 +113,15 @@ def evaluate_single_with_llm(
         answer=answer,
     )
 
+    # Rate limit: esperar entre requests
+    time.sleep(4)
+
     response = llm.invoke(prompt)
 
     try:
         scores = json.loads(str(response.content))
     except json.JSONDecodeError:
-        logger.error("Falha ao parsear resposta do juiz")
+        logger.error("Falha ao parsear resposta do juiz: %s", str(response.content)[:200])
         scores = {
             "correcao_factual": 3,
             "completude": 3,
@@ -206,7 +226,7 @@ def run_llm_judge(
     with open(golden_set_path, encoding="utf-8") as f:
         golden_set = json.load(f)
 
-    use_llm = os.getenv("OPENAI_API_KEY") is not None
+    use_llm = os.getenv("GOOGLE_API_KEY") is not None or os.getenv("OPENAI_API_KEY") is not None
     method = "llm_judge" if use_llm else "semantic_similarity"
     logger.info("Método: %s | Golden set: %d pares", method, len(golden_set))
 

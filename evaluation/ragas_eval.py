@@ -83,7 +83,7 @@ def evaluate_with_ragas(
         from langchain_google_genai import ChatGoogleGenerativeAI
 
         llm = ChatGoogleGenerativeAI(
-            model=os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash"),
+            model=os.getenv("GEMINI_MODEL_NAME", "gemini-2.0-flash"),
             google_api_key=google_api_key,
             temperature=0.0,
         )

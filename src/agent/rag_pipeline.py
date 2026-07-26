@@ -183,7 +183,7 @@ def generate_answer(query: str, contexts: list[str]) -> str:
             from langchain_google_genai import ChatGoogleGenerativeAI
 
             llm_gemini = ChatGoogleGenerativeAI(
-                model=os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash"),
+                model=os.getenv("GEMINI_MODEL_NAME", "gemini-2.0-flash"),
                 api_key=google_api_key,  # type: ignore[arg-type]
                 temperature=0.0,
             )

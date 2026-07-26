@@ -122,9 +122,6 @@ def evaluate_single_with_llm(
         answer=answer,
     )
 
-    # Rate limit: esperar entre requests
-    time.sleep(4)
-
     response = llm.invoke(prompt)
 
     try:

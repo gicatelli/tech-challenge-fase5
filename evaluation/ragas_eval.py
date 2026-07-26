@@ -274,11 +274,9 @@ def run_evaluation(
     golden_set = load_golden_set(golden_set_path)
 
     # Determinar método de avaliação
-    use_ragas = (
-        os.getenv("USE_OLLAMA", "true").lower() == "true"
-        or os.getenv("OPENAI_API_KEY") is not None
-        or os.getenv("GOOGLE_API_KEY") is not None
-    )
+    # RAGAS oficial não funciona com Ollama (incompatibilidade async no Colab)
+    # Usar sempre similaridade semântica (embeddings neurais) - rápido e reprodutível
+    use_ragas = False  # Forçar semantic similarity (compatível com qualquer ambiente)
 
     if use_ragas:
         logger.info("Usando RAGAS oficial (LLM disponível)")

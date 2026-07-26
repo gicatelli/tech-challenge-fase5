@@ -198,9 +198,9 @@ class TestGenerateSyntheticStockData:
 class TestCollectMultipleStocks:
     """Testes para collect_multiple_stocks."""
 
+    @patch("time.sleep")
     @patch("src.data_collection.collect_stock_data")
-    @patch("src.data_collection.time.sleep")
-    def test_collects_all_symbols(self, mock_sleep, mock_collect, tmp_path):
+    def test_collects_all_symbols(self, mock_collect, mock_sleep, tmp_path):
         """Deve coletar dados de todos os símbolos."""
         dates = pd.date_range("2024-01-01", periods=50, freq="B")
         mock_df = pd.DataFrame(
@@ -226,9 +226,9 @@ class TestCollectMultipleStocks:
         assert "VALE3.SA" in results
         assert len(results) == 2
 
+    @patch("time.sleep")
     @patch("src.data_collection.collect_stock_data")
-    @patch("src.data_collection.time.sleep")
-    def test_saves_metadata(self, mock_sleep, mock_collect, tmp_path):
+    def test_saves_metadata(self, mock_collect, mock_sleep, tmp_path):
         """Deve salvar metadata da coleta em JSON."""
         dates = pd.date_range("2024-01-01", periods=20, freq="B")
         mock_df = pd.DataFrame(
@@ -253,9 +253,9 @@ class TestCollectMultipleStocks:
         assert "collected_at" in metadata
         assert "records" in metadata
 
+    @patch("time.sleep")
     @patch("src.data_collection.collect_stock_data")
-    @patch("src.data_collection.time.sleep")
-    def test_handles_failed_symbol(self, mock_sleep, mock_collect, tmp_path):
+    def test_handles_failed_symbol(self, mock_collect, mock_sleep, tmp_path):
         """Deve continuar se um símbolo falhar."""
         dates = pd.date_range("2024-01-01", periods=20, freq="B")
         mock_df = pd.DataFrame(

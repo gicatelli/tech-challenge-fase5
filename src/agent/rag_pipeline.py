@@ -182,9 +182,9 @@ def generate_answer(query: str, contexts: list[str]) -> str:
         try:
             from langchain_google_genai import ChatGoogleGenerativeAI
 
-            llm = ChatGoogleGenerativeAI(
+            llm_gemini = ChatGoogleGenerativeAI(
                 model=os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash"),
-                google_api_key=google_api_key,
+                api_key=google_api_key,  # type: ignore[arg-type]
                 temperature=0.0,
             )
 
@@ -197,7 +197,7 @@ Pergunta: {query}
 
 Resposta:"""
 
-            response = llm.invoke(prompt)
+            response = llm_gemini.invoke(prompt)
             return response.content  # type: ignore[return-value]
         except Exception as e:
             logger.warning("Gemini falhou (%s), usando resposta baseada em contexto", e)

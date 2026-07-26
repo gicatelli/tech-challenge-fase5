@@ -79,17 +79,18 @@ def create_datathon_agent(
     google_api_key = os.getenv("GOOGLE_API_KEY")
     openai_api_key = os.getenv("OPENAI_API_KEY")
 
+    llm: object  # type: ignore[assignment]
     if google_api_key:
         from langchain_google_genai import ChatGoogleGenerativeAI
 
         llm = ChatGoogleGenerativeAI(
             model=os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash"),
-            google_api_key=google_api_key,
+            api_key=google_api_key,  # type: ignore[arg-type]
             temperature=temperature,
         )
         logger.info("Usando Gemini: %s", os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash"))
     elif openai_api_key:
-        llm = ChatOpenAI(
+        llm = ChatOpenAI(  # type: ignore[assignment]
             model=model_name,
             temperature=temperature,
             api_key=openai_api_key,  # type: ignore[arg-type]

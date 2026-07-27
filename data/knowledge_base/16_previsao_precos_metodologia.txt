@@ -1,0 +1,49 @@
+METODOLOGIA DE PREVISÃO DE PREÇOS — PETR4
+
+Abordagem do Projeto
+Este projeto utiliza duas abordagens complementares para previsão de preços:
+
+1. LSTM (Long Short-Term Memory)
+Rede neural recorrente especializada em séries temporais. Captura dependências de longo prazo nos dados de preço. Input: sequência de 60 dias com 27 features técnicas. Output: preço de fechamento do dia seguinte.
+
+2. Random Forest Regressor
+Ensemble de árvores de decisão. Usa features do último dia disponível para prever o próximo. Mais interpretável, menos propenso a overfitting.
+
+Features Utilizadas (27 no total)
+- Preços: close, high, low, open
+- Médias móveis: SMA 7, 30, 90 dias
+- Ratios: price/SMA7, price/SMA30, price/SMA90
+- Momentum: RSI 14 períodos
+- Tendência: MACD, MACD signal, MACD histogram
+- Volatilidade: Bollinger Bands (upper, middle, lower, width, position)
+- Retornos: log return 1d, 2d, 5d
+- Risco: volatilidade 7d, volatilidade 30d
+- Volume: volume normalizado
+- Range: daily range, daily range MA
+
+Processo de Treinamento
+1. Coleta de dados via yfinance (2020-presente)
+2. Feature engineering com indicadores técnicos
+3. Normalização MinMaxScaler (0-1)
+4. Split temporal 80/20 (sem shuffle — respeita cronologia)
+5. Treino LSTM com early stopping (patience=10)
+6. Treino RF com hiperparâmetros otimizados
+7. Comparação champion-challenger por RMSE
+8. Registro no MLflow Model Registry
+
+Métricas de Avaliação
+- MAE (Mean Absolute Error): erro médio em R$
+- RMSE (Root Mean Square Error): penaliza erros grandes
+- MAPE (Mean Absolute Percentage Error): erro percentual
+- R² (Coeficiente de Determinação): quanto da variância é explicada
+
+Limitações
+- Previsão de preço de ação é inerentemente difícil (hipótese de mercado eficiente)
+- Modelo não captura eventos black swan (pandemia, guerra, decisões políticas)
+- Performance passada não garante performance futura
+- Horizonte de previsão limitado a 1-5 dias (degradação rápida)
+
+Interpretação dos Resultados
+- R² > 0.90: modelo captura bem a tendência (esperado para próximo dia)
+- MAPE < 3%: erro percentual aceitável para trading
+- O modelo é mais útil para direção (alta/baixa) do que para preço exato

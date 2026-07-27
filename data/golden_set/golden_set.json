@@ -17,17 +17,17 @@
   {
     "query": "Qual o dividend yield histórico da Petrobras?",
     "expected_answer": "A Petrobras historicamente distribui entre 8-15% de dividend yield ao ano, sendo uma das maiores pagadoras de dividendos do mundo. A política é de distribuição de 45% do fluxo de caixa livre, podendo pagar dividendos extraordinários.",
-    "contexts": ["03_analise_petrobras.txt"]
+    "contexts": ["03_analise_petrobras.txt", "14_dividendos_petrobras.txt"]
   },
   {
     "query": "Quais são os principais riscos de investir em PETR4?",
     "expected_answer": "Os principais riscos são: risco político (interferência governamental), risco de commodity (correlação com preço do Brent), risco cambial (dívida em dólar), risco regulatório (mudanças em royalties e tributação) e risco ESG (transição energética).",
-    "contexts": ["03_analise_petrobras.txt"]
+    "contexts": ["03_analise_petrobras.txt", "15_riscos_petrobras.txt"]
   },
   {
     "query": "Qual o custo de extração do pré-sal brasileiro?",
     "expected_answer": "O custo de extração (lifting cost) do pré-sal é um dos mais baixos do mundo, em torno de USD 6-8 por barril. O break-even do pré-sal é de USD 25-35 por barril, tornando-o competitivo globalmente.",
-    "contexts": ["03_analise_petrobras.txt", "08_setor_petroleo_gas.txt"]
+    "contexts": ["13_pre_sal_detalhado.txt", "08_setor_petroleo_gas.txt"]
   },
   {
     "query": "Como funciona o VaR e qual o VaR 95% típico da PETR4?",
@@ -52,7 +52,7 @@
   {
     "query": "Qual a correlação entre o preço do Brent e a PETR4?",
     "expected_answer": "A correlação entre Brent e PETR4 é a mais forte entre todos os fatores macro, tipicamente acima de 0.6. Cada USD 10 de variação no Brent impacta o EBITDA da Petrobras em aproximadamente R$ 30 bilhões por ano.",
-    "contexts": ["05_indicadores_macroeconomicos.txt"]
+    "contexts": ["05_indicadores_macroeconomicos.txt", "08_setor_petroleo_gas.txt"]
   },
   {
     "query": "O que é o drawdown máximo e qual o da PETR4?",
@@ -67,7 +67,7 @@
   {
     "query": "Como funciona o modelo LSTM para previsão de preços?",
     "expected_answer": "O LSTM processa sequências de N dias de features (preço, volume, indicadores técnicos), atualizando seu estado interno. Após processar todos os dias, o estado final é passado para camadas densas que geram a previsão do preço de fechamento do próximo dia.",
-    "contexts": ["09_modelo_lstm_explicacao.txt"]
+    "contexts": ["09_modelo_lstm_explicacao.txt", "16_previsao_precos_metodologia.txt"]
   },
   {
     "query": "Quais as limitações do modelo LSTM para ações?",
@@ -98,5 +98,65 @@
     "query": "O que é o golden cross e o que indica?",
     "expected_answer": "O golden cross é o cruzamento de uma média móvel curta (como SMA 50) acima de uma média móvel longa (como SMA 200). Indica tendência de alta. É um dos sinais técnicos mais acompanhados por traders e investidores institucionais.",
     "contexts": ["01_glossario_indicadores_tecnicos.txt"]
+  },
+  {
+    "query": "O que é beta de uma ação e qual o beta da PETR4?",
+    "expected_answer": "Beta mede a sensibilidade de uma ação em relação ao mercado (Ibovespa). Beta > 1 indica maior volatilidade que o mercado. PETR4 historicamente tem beta entre 1.1 e 1.4, indicando que amplifica os movimentos do Ibovespa.",
+    "contexts": ["06_conceitos_risco.txt", "07_analise_tecnica_petr4.txt"]
+  },
+  {
+    "query": "O que é P/L (Preço/Lucro) e como usar na avaliação?",
+    "expected_answer": "P/L é o preço da ação dividido pelo lucro por ação dos últimos 12 meses. P/L baixo pode indicar ação barata ou empresa com problemas. P/L da PETR4 historicamente varia entre 4 e 8, abaixo da média do setor global de petróleo (~12).",
+    "contexts": ["02_glossario_financeiro_geral.txt", "03_analise_petrobras.txt"]
+  },
+  {
+    "query": "Qual a política de dividendos atual da Petrobras?",
+    "expected_answer": "A política de dividendos da Petrobras prevê distribuição mínima de 45% do fluxo de caixa livre quando a dívida bruta está abaixo de USD 65 bilhões. Dividendos são pagos trimestralmente, podendo haver extraordinários. A empresa tem mantido payout acima de 60% nos últimos anos.",
+    "contexts": ["14_dividendos_petrobras.txt", "03_analise_petrobras.txt"]
+  },
+  {
+    "query": "Quais são os principais campos de pré-sal da Petrobras?",
+    "expected_answer": "Os principais campos são Tupi (Lula), Búzios, Sapinhoá e Mero, todos na Bacia de Santos. O campo de Búzios é o maior do pré-sal com produção superior a 600 mil barris/dia. Juntos representam mais de 70% da produção total da empresa.",
+    "contexts": ["13_pre_sal_detalhado.txt"]
+  },
+  {
+    "query": "O que é o ATR (Average True Range) e para que serve?",
+    "expected_answer": "O ATR mede a volatilidade média de um ativo calculando a média dos True Ranges (máximo entre: High-Low, |High-Close anterior|, |Low-Close anterior|) dos últimos N períodos. É usado para dimensionar stop loss, position sizing e identificar expansão/contração de volatilidade.",
+    "contexts": ["01_glossario_indicadores_tecnicos.txt"]
+  },
+  {
+    "query": "Como funciona o regime de partilha no pré-sal?",
+    "expected_answer": "No regime de partilha, a Petrobras é operadora obrigatória com participação mínima de 30%. O excedente em óleo (oil profit) é dividido entre a empresa e a União conforme percentuais definidos no leilão. Quanto maior a oferta de excedente para a União, mais competitiva a proposta.",
+    "contexts": ["13_pre_sal_detalhado.txt", "08_setor_petroleo_gas.txt"]
+  },
+  {
+    "query": "O que é EV/EBITDA e qual o da Petrobras?",
+    "expected_answer": "EV/EBITDA compara o valor da empresa (market cap + dívida líquida) com sua geração operacional de caixa. Petrobras historicamente negocia entre 3x e 5x EV/EBITDA, um desconto significativo vs majors globais (Shell, ExxonMobil) que negociam a 5-7x.",
+    "contexts": ["02_glossario_financeiro_geral.txt", "11_resultados_petrobras.txt"]
+  },
+  {
+    "query": "Quais indicadores ESG são relevantes para a Petrobras?",
+    "expected_answer": "Os principais são: intensidade de emissões de GEE (CO2e/boe), investimento em energias renováveis, metas de carbono neutro, taxa de acidentes de trabalho (LTIF), diversidade no conselho e transparência em governança. A transição energética é o principal risco ESG de longo prazo.",
+    "contexts": ["17_governanca_esg_petrobras.txt"]
+  },
+  {
+    "query": "Como a Petrobras se posiciona na transição energética?",
+    "expected_answer": "A Petrobras tem meta de reduzir emissões operacionais em 30% até 2030 e neutralidade de carbono até 2050. Investe em captura de CO2, eólica offshore e biocombustíveis, mas mantém foco principal em E&P de petróleo dada sua vantagem competitiva no pré-sal.",
+    "contexts": ["17_governanca_esg_petrobras.txt", "15_riscos_petrobras.txt"]
+  },
+  {
+    "query": "Qual a diferença entre análise técnica e análise fundamentalista?",
+    "expected_answer": "Análise técnica estuda padrões de preço e volume para prever movimentos futuros, usando indicadores como RSI, MACD e médias móveis. Análise fundamentalista avalia o valor intrínseco da empresa com base em demonstrações financeiras, setor e macroeconomia. Ambas são complementares.",
+    "contexts": ["07_analise_tecnica_petr4.txt", "02_glossario_financeiro_geral.txt"]
+  },
+  {
+    "query": "Qual a importância do volume na confirmação de tendências?",
+    "expected_answer": "Volume crescente durante alta de preço confirma tendência de alta (compradores convictos). Volume decrescente em alta sugere fraqueza. Breakouts com volume alto são mais confiáveis. Para PETR4, volume diário médio é acima de 30 milhões de ações.",
+    "contexts": ["07_analise_tecnica_petr4.txt", "01_glossario_indicadores_tecnicos.txt"]
+  },
+  {
+    "query": "Como é feita a previsão de preços usando ensemble de modelos?",
+    "expected_answer": "Ensemble combina previsões de múltiplos modelos (LSTM, Random Forest) via média ponderada. O peso de cada modelo é definido pelo inverso do RMSE no conjunto de validação. Ensembles geralmente superam modelos individuais por reduzir variância e capturar padrões complementares.",
+    "contexts": ["16_previsao_precos_metodologia.txt", "09_modelo_lstm_explicacao.txt"]
   }
 ]

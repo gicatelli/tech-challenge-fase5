@@ -12,10 +12,15 @@ Implementa proteções contra:
 import logging
 import re
 
-from presidio_analyzer import AnalyzerEngine
-from presidio_anonymizer import AnonymizerEngine
-
 logger = logging.getLogger(__name__)
+
+# Import Presidio com fallback
+try:
+    from presidio_analyzer import AnalyzerEngine
+    from presidio_anonymizer import AnonymizerEngine
+    PRESIDIO_AVAILABLE = True
+except ImportError:
+    PRESIDIO_AVAILABLE = False
 
 
 class InputGuardrail:
@@ -98,6 +103,14 @@ class InputGuardrail:
 class OutputGuardrail:
     """Valida e sanitiza output do LLM antes de retornar ao usuário."""
 
+    # Padrões de PII via regex (fallback quando Presidio indisponível)
+    PII_PATTERNS = [
+        (r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b", "<CPF_REDACTED>"),
+        (r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", "<EMAIL_REDACTED>"),
+        (r"\b\d{2}\s?\d{4,5}-?\d{4}\b", "<PHONE_REDACTED>"),
+        (r"\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}", "<CREDIT_CARD_REDACTED>"),
+    ]
+
     def __init__(self, language: str = "pt"):
         """Inicializa guardrail de output.
 
@@ -105,12 +118,33 @@ class OutputGuardrail:
             language: Idioma para detecção de PII.
 
         """
-        self.analyzer = AnalyzerEngine()
-        self.anonymizer = AnonymizerEngine()
         self.language = language
+        self._use_presidio = False
+        self._compiled_pii = [(re.compile(p), r) for p, r in self.PII_PATTERNS]
+
+        if PRESIDIO_AVAILABLE:
+            try:
+                self.analyzer = AnalyzerEngine()
+                self.anonymizer = AnonymizerEngine()
+                # Testar se tem recognizers funcionais
+                test_results = self.analyzer.analyze(
+                    text="test@email.com", language="en",
+                    entities=["EMAIL_ADDRESS"],
+                )
+                if test_results:
+                    self._use_presidio = True
+                    logger.info("OutputGuardrail: usando Presidio")
+            except Exception as e:
+                logger.info("OutputGuardrail: Presidio indisponível (%s), usando regex", e)
+        else:
+            logger.info("OutputGuardrail: Presidio não instalado, usando regex")
 
     def sanitize(self, llm_output: str) -> str:
         """Remove PII do output do LLM.
+
+        Usa Presidio se disponível, caso contrário aplica regex patterns.
+        Sempre aplica regex como segunda camada para capturar cartões de crédito
+        e outros padrões que o Presidio pode não detectar em textos PT-BR.
 
         Args:
             llm_output: Texto gerado pelo LLM.
@@ -119,22 +153,36 @@ class OutputGuardrail:
             Texto sanitizado.
 
         """
-        results = self.analyzer.analyze(
-            text=llm_output,
-            language=self.language,
-            entities=["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "CREDIT_CARD"],
-        )
+        sanitized = llm_output
 
-        if results:
-            logger.warning("PII detectado no output: %d entidades", len(results))
-            # Tipos de RecognizerResult diferem entre presidio-analyzer e anonymizer
-            anonymized = self.anonymizer.anonymize(
-                text=llm_output,
-                analyzer_results=results,  # type: ignore[arg-type]
-            )
-            return anonymized.text
+        if self._use_presidio:
+            try:
+                results = self.analyzer.analyze(
+                    text=sanitized,
+                    language="en",  # Presidio funciona melhor em inglês
+                    entities=["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "CREDIT_CARD"],
+                )
+                if results:
+                    logger.warning("PII detectado no output: %d entidades", len(results))
+                    anonymized = self.anonymizer.anonymize(
+                        text=sanitized,
+                        analyzer_results=results,  # type: ignore[arg-type]
+                    )
+                    sanitized = anonymized.text
+            except Exception as e:
+                logger.warning("Presidio falhou (%s), usando regex fallback", e)
 
-        return llm_output
+        # Segunda camada: regex-based PII detection (captura cartões e padrões BR)
+        pii_found = False
+        for pattern, replacement in self._compiled_pii:
+            if pattern.search(sanitized):
+                sanitized = pattern.sub(replacement, sanitized)
+                pii_found = True
+
+        if pii_found:
+            logger.warning("PII detectado (regex) e removido do output")
+
+        return sanitized
 
     def validate_output(self, llm_output: str) -> tuple[bool, str]:
         """Valida se o output é seguro para retornar.

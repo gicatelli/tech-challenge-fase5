@@ -38,7 +38,17 @@ logger = logging.getLogger(__name__)
 
 # Guardrails
 input_guardrail = InputGuardrail()
-output_guardrail = OutputGuardrail()
+
+# Output guardrail (lazy - inicializado no primeiro uso)
+_output_guardrail = None
+
+
+def get_output_guardrail() -> OutputGuardrail:
+    """Lazy initialization do OutputGuardrail."""
+    global _output_guardrail
+    if _output_guardrail is None:
+        _output_guardrail = OutputGuardrail()
+    return _output_guardrail
 
 # Agent (lazy init — requer OPENAI_API_KEY)
 _agent = None
@@ -91,6 +101,7 @@ class QueryRequest(BaseModel):
         default=True,
         description="Se True, usa agente ReAct. Se False, RAG direto.",
     )
+    top_k: int = Field(default=3, description="Número de contextos para RAG")
 
 
 class QueryResponse(BaseModel):
@@ -146,19 +157,18 @@ async def query_agent(request: QueryRequest):
         if request.use_agent:
             from src.agent.react_agent import run_agent
 
-            agent = get_agent()
-            result = run_agent(request.query, agent)
+            result = run_agent(request.query)
             answer = result["answer"]
             contexts: list[str] = []
             steps = result["steps"]
         else:
             from src.agent.rag_pipeline import rag_query
 
-            answer, contexts = rag_query(request.query)
+            answer, contexts = rag_query(request.query, top_k=request.top_k)
             steps = 0
 
         # Guardrail de output (PII removal)
-        answer = output_guardrail.sanitize(answer)
+        answer = get_output_guardrail().sanitize(answer)
 
         latency_ms = (time.time() - start_time) * 1000
 
@@ -185,9 +195,34 @@ async def metrics():
     return Response(content=generate_latest(), media_type="text/plain")
 
 
+@app.get("/metrics/summary", tags=["System"])
+async def metrics_summary():
+    """Resumo de métricas da API em JSON."""
+    return {
+        "status": "operational",
+        "model": "lstm-petr4-predictor",
+        "tools_available": 4,
+        "guardrails": {"input": True, "output": True},
+    }
+
+
 # ============================================
 # Endpoints diretos (sem LLM — tools reais)
 # ============================================
+
+# Aliases para compatibilidade com o notebook de avaliação
+@app.post("/agent/query", response_model=QueryResponse, tags=["Agent"])
+async def agent_query_alias(request: QueryRequest):
+    """Alias: consulta via agente ReAct."""
+    request.use_agent = True
+    return await query_agent(request)
+
+
+@app.post("/rag/query", response_model=QueryResponse, tags=["Agent"])
+async def rag_query_alias(request: QueryRequest):
+    """Alias: consulta via RAG direto (sem agente)."""
+    request.use_agent = False
+    return await query_agent(request)
 
 
 class ToolRequest(BaseModel):

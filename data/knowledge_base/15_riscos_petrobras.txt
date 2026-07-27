@@ -1,0 +1,53 @@
+ANÁLISE DE RISCOS — PETROBRAS (PETR4)
+
+Riscos Operacionais
+- Acidentes em plataformas: operação em águas ultra-profundas tem risco inerente
+- Paradas de manutenção: reduzem produção temporariamente
+- Complexidade do pré-sal: profundidade de 7.000m exige tecnologia de ponta
+- Dependência de fornecedores: equipamentos especializados têm poucos fabricantes
+
+Riscos de Mercado
+- Preço do petróleo (Brent): principal driver de receita. Queda de USD 10/barril reduz lucro em ~R$ 15 bilhões/ano
+- Câmbio (USD/BRL): receitas em dólar, custos mistos. Real forte reduz receita em BRL
+- Taxa de juros: dívida em USD é sensível ao Fed Funds Rate
+- Volatilidade: ação PETR4 tem beta histórico de ~1.3 vs Ibovespa
+
+Riscos Políticos e Regulatórios
+- Acionista majoritário é o governo federal (36.6% das ações ordinárias)
+- Interferência na política de preços de combustíveis (histórico de defasagem)
+- Nomeações políticas para diretoria e conselho
+- Mudanças no regime de partilha do pré-sal
+- Pressão para investimentos em áreas não-rentáveis (refinarias, fertilizantes)
+
+Riscos ESG (Ambiental, Social, Governança)
+- Transição energética: demanda de petróleo pode cair pós-2040
+- Emissões de carbono: pressão de investidores ESG
+- Vazamentos: risco reputacional e multas
+- Governança: histórico de corrupção (Lava Jato) gera desconto permanente
+
+Riscos Financeiros
+- Dívida bruta: ~USD 60 bilhões (gerenciável mas significativa)
+- Alavancagem: Dívida Líquida/EBITDA de ~1.0x (saudável atualmente)
+- Necessidade de CAPEX: USD 18-21 bilhões/ano nos próximos 5 anos
+- Exposição cambial: mismatch entre receitas (USD) e dividendos (BRL)
+
+Métricas de Risco para PETR4
+- VaR 95% (1 dia): ~3.5% do valor da posição
+- Volatilidade histórica (30d): ~25-35% anualizada
+- Drawdown máximo (5 anos): -60% (COVID março 2020)
+- Sharpe Ratio (3 anos): ~0.8-1.2
+
+Mitigantes
+- Diversificação geográfica (campos em múltiplas bacias)
+- Break-even competitivo (USD 25-35/barril no pré-sal)
+- Geração de caixa robusta (>USD 30 bilhões/ano)
+- Política de hedge cambial parcial
+- Governança melhorada pós-Lava Jato (comitês independentes)
+
+Recomendação de Gestão de Risco
+Para investidores em PETR4:
+- Não concentrar mais de 10-15% do portfólio em um único ativo
+- Monitorar preço do Brent como indicador antecedente
+- Acompanhar decisões do governo sobre política de preços
+- Considerar proteção via opções em períodos de alta volatilidade
+- Diversificar entre PETR3 (ON, voto) e PETR4 (PN, dividendos)

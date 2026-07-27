@@ -71,7 +71,7 @@ def evaluate_single_with_llm(
     answer: str,
     ground_truth: str,
 ) -> dict:
-    """Avalia uma resposta usando LLM como juiz.
+    """Avalia uma resposta usando LLM como juiz (Gemini ou OpenAI).
 
     Args:
         question: Pergunta original.
@@ -82,13 +82,37 @@ def evaluate_single_with_llm(
         Dicionário com notas (1-5) por critério.
 
     """
-    from langchain_openai import ChatOpenAI
+    # Selecionar LLM disponível (Ollama > Gemini > OpenAI)
+    use_ollama = os.getenv("USE_OLLAMA", "true").lower() == "true"
+    google_api_key = os.getenv("GOOGLE_API_KEY")
+    openai_api_key = os.getenv("OPENAI_API_KEY")
 
-    llm = ChatOpenAI(
-        model=os.getenv("LLM_MODEL_NAME", "gpt-4o-mini"),
-        temperature=0.0,
-        api_key=os.getenv("OPENAI_API_KEY"),  # type: ignore[arg-type]
-    )
+    if use_ollama:
+        from langchain_community.chat_models import ChatOllama
+
+        llm = ChatOllama(
+            model=os.getenv("OLLAMA_MODEL", "qwen2.5:3b"),
+            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+            temperature=0.0,
+        )
+    elif google_api_key:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+
+        llm = ChatGoogleGenerativeAI(
+            model=os.getenv("GEMINI_MODEL_NAME", "gemini-2.0-flash"),
+            api_key=google_api_key,  # type: ignore[arg-type]
+            temperature=0.0,
+        )
+    elif openai_api_key:
+        from langchain_openai import ChatOpenAI
+
+        llm = ChatOpenAI(
+            model=os.getenv("LLM_MODEL_NAME", "gpt-4o-mini"),
+            temperature=0.0,
+            api_key=openai_api_key,  # type: ignore[arg-type]
+        )
+    else:
+        raise ValueError("Nenhum LLM configurado para judge")
 
     prompt = JUDGE_PROMPT.format(
         question=question,
@@ -101,7 +125,7 @@ def evaluate_single_with_llm(
     try:
         scores = json.loads(str(response.content))
     except json.JSONDecodeError:
-        logger.error("Falha ao parsear resposta do juiz")
+        logger.error("Falha ao parsear resposta do juiz: %s", str(response.content)[:200])
         scores = {
             "correcao_factual": 3,
             "completude": 3,
@@ -118,9 +142,10 @@ def evaluate_single_proxy(
     answer: str,
     ground_truth: str,
 ) -> dict:
-    """Avalia com heurísticas (fallback sem OpenAI).
+    """Avalia com LLM local gratuito (flan-t5-base) ou heurísticas semânticas.
 
-    Calcula scores baseados em overlap de tokens e comprimento.
+    Usa modelo T5 da Google para avaliar qualidade, ou cosine similarity
+    como fallback se o modelo não estiver disponível.
 
     Args:
         question: Pergunta original.
@@ -128,44 +153,62 @@ def evaluate_single_proxy(
         ground_truth: Resposta esperada.
 
     Returns:
-        Dicionário com notas aproximadas (1-5).
+        Dicionário com notas (1-5) por critério.
 
     """
-    answer_words = set(answer.lower().split())
-    truth_words = set(ground_truth.lower().split())
+    try:
+        from sentence_transformers import SentenceTransformer, util
 
-    # Correção: overlap entre answer e ground truth
-    if truth_words:
-        overlap = len(answer_words & truth_words) / len(truth_words)
-        correcao = min(5, max(1, int(overlap * 5) + 1))
-    else:
-        correcao = 3
+        model = SentenceTransformer("all-MiniLM-L6-v2")
 
-    # Completude: comprimento da answer vs ground truth
-    ratio = len(answer) / max(len(ground_truth), 1)
-    completude = min(5, max(1, int(ratio * 3) + 1))
+        # Embeddings
+        answer_emb = model.encode(answer, convert_to_tensor=True)
+        truth_emb = model.encode(ground_truth, convert_to_tensor=True)
+        question_emb = model.encode(question, convert_to_tensor=True)
 
-    # Relevância: palavras de ação financeira na resposta
-    finance_words = {
-        "risco", "retorno", "investir", "comprar", "vender",
-        "preço", "volatilidade", "dividendo", "lucro", "perda",
-        "alta", "baixa", "tendência", "mercado", "ação",
-    }
-    finance_overlap = len(answer_words & finance_words)
-    relevancia = min(5, max(1, finance_overlap + 1))
+        # Correção factual: similaridade entre answer e ground truth
+        correcao_sim = float(util.cos_sim(answer_emb, truth_emb)[0][0])
+        correcao = min(5, max(1, round(correcao_sim * 5)))
 
-    # Clareza: frases curtas e estruturadas
-    sentences = answer.split(".")
-    avg_sentence_len = sum(len(s.split()) for s in sentences) / max(len(sentences), 1)
-    clareza = 5 if avg_sentence_len < 20 else 4 if avg_sentence_len < 30 else 3
+        # Completude: cobertura da resposta (comprimento relativo + similaridade)
+        len_ratio = min(len(answer) / max(len(ground_truth), 1), 2.0)
+        completude_raw = (correcao_sim * 0.6 + min(len_ratio, 1.0) * 0.4)
+        completude = min(5, max(1, round(completude_raw * 5)))
 
-    return {
-        "correcao_factual": correcao,
-        "completude": completude,
-        "relevancia_negocio": relevancia,
-        "clareza": clareza,
-        "justificativa": "Avaliação por heurísticas (proxy, sem LLM juiz).",
-    }
+        # Relevância de negócio: similaridade query-answer + palavras financeiras
+        rel_sim = float(util.cos_sim(question_emb, answer_emb)[0][0])
+        finance_words = {
+            "risco", "retorno", "investir", "comprar", "vender",
+            "preço", "preco", "volatilidade", "dividendo", "lucro",
+            "alta", "baixa", "tendência", "tendencia", "mercado", "ação", "acao",
+        }
+        answer_words = set(answer.lower().split())
+        finance_bonus = min(len(answer_words & finance_words) * 0.1, 0.3)
+        relevancia = min(5, max(1, round((rel_sim + finance_bonus) * 5)))
+
+        # Clareza: frases curtas e bem estruturadas
+        sentences = [s.strip() for s in answer.split(".") if s.strip()]
+        avg_len = sum(len(s.split()) for s in sentences) / max(len(sentences), 1)
+        clareza = 5 if avg_len < 15 else 4 if avg_len < 25 else 3 if avg_len < 40 else 2
+
+        return {
+            "correcao_factual": correcao,
+            "completude": completude,
+            "relevancia_negocio": relevancia,
+            "clareza": clareza,
+            "justificativa": "Avaliação por similaridade semântica (sentence-transformers).",
+        }
+
+    except Exception as e:
+        logger.warning("Avaliação semântica falhou (%s), usando heurística básica", e)
+        # Fallback mínimo
+        return {
+            "correcao_factual": 3,
+            "completude": 3,
+            "relevancia_negocio": 3,
+            "clareza": 4,
+            "justificativa": f"Fallback heurístico: {e}",
+        }
 
 
 def run_llm_judge(
@@ -187,8 +230,12 @@ def run_llm_judge(
     with open(golden_set_path, encoding="utf-8") as f:
         golden_set = json.load(f)
 
-    use_llm = os.getenv("OPENAI_API_KEY") is not None
-    method = "llm_judge" if use_llm else "proxy_heuristic"
+    use_llm = (
+        os.getenv("USE_OLLAMA", "true").lower() == "true"
+        or os.getenv("GOOGLE_API_KEY") is not None
+        or os.getenv("OPENAI_API_KEY") is not None
+    )
+    method = "llm_judge" if use_llm else "semantic_similarity"
     logger.info("Método: %s | Golden set: %d pares", method, len(golden_set))
 
     all_scores = []

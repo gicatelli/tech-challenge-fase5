@@ -83,12 +83,12 @@ def create_analyzer() -> AnalyzerEngine:
     return analyzer
 
 
-def detect_pii(text: str, language: str = "pt") -> list[dict]:
+def detect_pii(text: str, language: str = "en") -> list[dict]:
     """Detecta PII em um texto.
 
     Args:
         text: Texto para análise.
-        language: Idioma do texto.
+        language: Idioma para recognizers Presidio (padrão: "en").
 
     Returns:
         Lista de entidades PII encontradas.
@@ -127,12 +127,12 @@ def detect_pii(text: str, language: str = "pt") -> list[dict]:
     return pii_found
 
 
-def anonymize_text(text: str, language: str = "pt") -> str:
+def anonymize_text(text: str, language: str = "en") -> str:
     """Anonimiza PII em um texto.
 
     Args:
         text: Texto com PII.
-        language: Idioma do texto.
+        language: Idioma para recognizers Presidio (padrão: "en").
 
     Returns:
         Texto anonimizado.

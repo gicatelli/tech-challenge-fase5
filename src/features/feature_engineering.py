@@ -11,6 +11,8 @@ Indicadores implementados:
 - Retornos logarítmicos
 - Volatilidade rolling
 - Volume normalizado
+- Features exógenas (Brent, USD/BRL, Ibovespa)
+- Features de correlação (VALE3, ITUB4)
 """
 
 import logging
@@ -211,16 +213,26 @@ def normalize_volume(volume: pd.Series, window: int = 30) -> pd.Series:
 # === PIPELINE PRINCIPAL ===
 
 
-def compute_features(df: pd.DataFrame, validate: bool = True) -> pd.DataFrame:
+def compute_features(
+    df: pd.DataFrame,
+    validate: bool = True,
+    include_exogenous: bool = True,
+    include_correlations: bool = True,
+    data_dir: str = "data/raw",
+) -> pd.DataFrame:
     """Computa features técnicas a partir de dados OHLCV.
 
     Pipeline completo de feature engineering para séries temporais
-    financeiras. Gera indicadores técnicos padronizados e remove
-    linhas iniciais com NaN (warm-up period dos indicadores).
+    financeiras. Gera indicadores técnicos padronizados, features
+    exógenas (Brent, USD/BRL, Ibovespa) e features de correlação
+    (VALE3, ITUB4). Remove linhas iniciais com NaN (warm-up period).
 
     Args:
         df: DataFrame com colunas OHLCV (Open, High, Low, Close, Volume).
         validate: Se True, valida schemas de entrada e saída.
+        include_exogenous: Se True, adiciona Brent, USD/BRL, Ibovespa.
+        include_correlations: Se True, adiciona VALE3, ITUB4 como features.
+        data_dir: Diretório com dados brutos para features exógenas.
 
     Returns:
         DataFrame com features técnicas computadas (sem NaN).
@@ -286,6 +298,31 @@ def compute_features(df: pd.DataFrame, validate: bool = True) -> pd.DataFrame:
     result["daily_range"] = (df["High"] - df["Low"]) / df["Close"]
     result["daily_range_ma"] = result["daily_range"].rolling(14).mean()
 
+    # === FEATURES EXÓGENAS (Brent, USD/BRL, Ibovespa) ===
+    if include_exogenous:
+        try:
+            exog = load_exogenous_features(df.index, data_dir=data_dir)
+            if not exog.empty:
+                for col in exog.columns:
+                    result[col] = exog[col]
+                logger.info("Features exógenas adicionadas: %d colunas", len(exog.columns))
+        except Exception as e:
+            logger.warning("Features exógenas não disponíveis: %s", e)
+
+    # === FEATURES DE CORRELAÇÃO (VALE3, ITUB4) ===
+    if include_correlations:
+        try:
+            corr_features = load_correlation_features(df.index, data_dir=data_dir)
+            if not corr_features.empty:
+                for col in corr_features.columns:
+                    result[col] = corr_features[col]
+                logger.info(
+                    "Features de correlação adicionadas: %d colunas",
+                    len(corr_features.columns),
+                )
+        except Exception as e:
+            logger.warning("Features de correlação não disponíveis: %s", e)
+
     # Remover linhas com NaN (warm-up period dos indicadores)
     initial_rows = len(result)
     result = result.dropna()
@@ -301,6 +338,162 @@ def compute_features(df: pd.DataFrame, validate: bool = True) -> pd.DataFrame:
         OUTPUT_SCHEMA.validate(result, lazy=True)
 
     return result
+
+
+def load_exogenous_features(
+    petr4_index: pd.DatetimeIndex,
+    data_dir: str = "data/raw",
+) -> pd.DataFrame:
+    """Carrega e prepara features exógenas (Brent, USD/BRL, Ibovespa).
+
+    Features exógenas capturam fatores macroeconômicos que impactam
+    PETR4 mas não estão nos dados OHLCV do ativo:
+    - Brent: correlação direta com receita da Petrobras
+    - USD/BRL: impacta dívida e receita de exportação
+    - Ibovespa: sentimento geral do mercado brasileiro
+
+    Args:
+        petr4_index: DatetimeIndex do DataFrame principal (para alinhamento).
+        data_dir: Diretório com dados brutos.
+
+    Returns:
+        DataFrame com features exógenas alinhadas ao index de PETR4.
+
+    """
+    from pathlib import Path
+
+    logger.info("Carregando features exógenas...")
+
+    exog = pd.DataFrame(index=petr4_index)
+
+    # Tentar carregar dados exógenos (Brent, USD/BRL, Ibovespa)
+    try:
+        import yfinance as yf
+
+        # Brent Crude Oil (BZ=F)
+        brent_path = Path(data_dir) / "BZ_F_historico.csv"
+        if brent_path.exists():
+            brent = pd.read_csv(brent_path, index_col=0, parse_dates=True)
+            brent_close = brent["Close"]
+        else:
+            brent_close = yf.download(
+                "BZ=F", start=petr4_index[0], end=petr4_index[-1], progress=False
+            )["Close"]
+            if isinstance(brent_close, pd.DataFrame):
+                brent_close = brent_close.iloc[:, 0]
+
+        # USD/BRL (USDBRL=X)
+        usdbrl_path = Path(data_dir) / "USDBRL_X_historico.csv"
+        if usdbrl_path.exists():
+            usdbrl = pd.read_csv(usdbrl_path, index_col=0, parse_dates=True)
+            usdbrl_close = usdbrl["Close"]
+        else:
+            usdbrl_close = yf.download(
+                "USDBRL=X", start=petr4_index[0], end=petr4_index[-1], progress=False
+            )["Close"]
+            if isinstance(usdbrl_close, pd.DataFrame):
+                usdbrl_close = usdbrl_close.iloc[:, 0]
+
+        # Ibovespa (^BVSP)
+        ibov_path = Path(data_dir) / "BVSP_historico.csv"
+        if ibov_path.exists():
+            ibov = pd.read_csv(ibov_path, index_col=0, parse_dates=True)
+            ibov_close = ibov["Close"]
+        else:
+            ibov_close = yf.download(
+                "^BVSP", start=petr4_index[0], end=petr4_index[-1], progress=False
+            )["Close"]
+            if isinstance(ibov_close, pd.DataFrame):
+                ibov_close = ibov_close.iloc[:, 0]
+
+        # Alinhar ao index de PETR4 (forward fill para gaps de feriados)
+        if len(brent_close) > 0:
+            exog["brent_close"] = brent_close.reindex(petr4_index, method="ffill")
+            exog["brent_return"] = compute_log_returns(exog["brent_close"])
+            exog["brent_return_5d"] = exog["brent_return"].rolling(5).sum()
+            logger.info("Brent adicionado: %d registros", exog["brent_close"].notna().sum())
+
+        if len(usdbrl_close) > 0:
+            exog["usdbrl_close"] = usdbrl_close.reindex(petr4_index, method="ffill")
+            exog["usdbrl_return"] = compute_log_returns(exog["usdbrl_close"])
+            exog["usdbrl_volatility"] = compute_volatility(exog["usdbrl_return"], window=14)
+            logger.info("USD/BRL adicionado: %d registros", exog["usdbrl_close"].notna().sum())
+
+        if len(ibov_close) > 0:
+            exog["ibov_close"] = ibov_close.reindex(petr4_index, method="ffill")
+            exog["ibov_return"] = compute_log_returns(exog["ibov_close"])
+            exog["ibov_return_5d"] = exog["ibov_return"].rolling(5).sum()
+            exog["ibov_rsi_14"] = compute_rsi(exog["ibov_close"], period=14)
+            logger.info("Ibovespa adicionado: %d registros", exog["ibov_close"].notna().sum())
+
+    except Exception as e:
+        logger.warning("Falha ao carregar features exógenas: %s. Continuando sem elas.", e)
+
+    # Remover colunas de preço bruto (manter apenas retornos e indicadores derivados)
+    drop_cols = [c for c in exog.columns if c.endswith("_close")]
+    exog = exog.drop(columns=drop_cols, errors="ignore")
+
+    logger.info("Features exógenas: %d colunas", len(exog.columns))
+    return exog
+
+
+def load_correlation_features(
+    petr4_index: pd.DatetimeIndex,
+    data_dir: str = "data/raw",
+) -> pd.DataFrame:
+    """Carrega features de correlação cruzada (VALE3, ITUB4).
+
+    VALE3 e ITUB4 são os ativos mais líquidos da B3 junto com PETR4.
+    Seus movimentos relativos capturam rotação setorial e sentimento
+    de mercado que impactam PETR4.
+
+    Features geradas:
+    - Retornos de VALE3/ITUB4 (momentum cross-asset)
+    - Spread PETR4 vs VALE3/ITUB4 (mean reversion)
+    - Correlação rolling (regime detection)
+
+    Args:
+        petr4_index: DatetimeIndex do DataFrame principal.
+        data_dir: Diretório com dados brutos.
+
+    Returns:
+        DataFrame com features de correlação alinhadas.
+
+    """
+    from pathlib import Path
+
+    logger.info("Carregando features de correlação (VALE3, ITUB4)...")
+
+    corr = pd.DataFrame(index=petr4_index)
+
+    # Carregar VALE3
+    vale3_path = Path(data_dir) / "VALE3_SA_historico.csv"
+    if vale3_path.exists():
+        vale3 = pd.read_csv(vale3_path, index_col=0, parse_dates=True)
+        vale3_close = vale3["Close"].reindex(petr4_index, method="ffill")
+
+        corr["vale3_return"] = compute_log_returns(vale3_close)
+        corr["vale3_return_5d"] = corr["vale3_return"].rolling(5).sum()
+        corr["vale3_rsi_14"] = compute_rsi(vale3_close, period=14)
+        logger.info("VALE3 adicionado como feature de correlação")
+    else:
+        logger.warning("VALE3 não encontrado em %s", vale3_path)
+
+    # Carregar ITUB4
+    itub4_path = Path(data_dir) / "ITUB4_SA_historico.csv"
+    if itub4_path.exists():
+        itub4 = pd.read_csv(itub4_path, index_col=0, parse_dates=True)
+        itub4_close = itub4["Close"].reindex(petr4_index, method="ffill")
+
+        corr["itub4_return"] = compute_log_returns(itub4_close)
+        corr["itub4_return_5d"] = corr["itub4_return"].rolling(5).sum()
+        corr["itub4_rsi_14"] = compute_rsi(itub4_close, period=14)
+        logger.info("ITUB4 adicionado como feature de correlação")
+    else:
+        logger.warning("ITUB4 não encontrado em %s", itub4_path)
+
+    logger.info("Features de correlação: %d colunas", len(corr.columns))
+    return corr
 
 
 def prepare_sequences(

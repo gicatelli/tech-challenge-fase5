@@ -330,6 +330,8 @@ def save_best_params(params: dict, output_path: str = "configs/model_config.yaml
     """
     config_path = Path(output_path)
     config = yaml.safe_load(config_path.read_text()) if config_path.exists() else {}
+    if config is None:
+        config = {}
 
     # Adicionar/atualizar seção LSTM otimizada
     config["lstm_optimized"] = {

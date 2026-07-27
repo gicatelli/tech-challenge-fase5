@@ -30,8 +30,10 @@ dependencies = [
     "langchain-core>=0.2.0,<0.3.0",
     "langchain-community>=0.2.0,<0.3.0",
     "langchain-openai>=0.1.0,<0.3.0",
+    "langchain-google-genai>=1.0.0,<2.0.0",
     "langchain-text-splitters>=0.2.0,<0.3.0",
     "openai>=1.30.0",
+    "google-generativeai>=0.5.0,<1.0.0",
     "chromadb>=0.5.0",
     "sentence-transformers>=3.0.0",
 
@@ -59,7 +61,7 @@ dependencies = [
     "datasets>=2.19.0",
 
     # Observability
-    "langfuse>=2.0.0",
+    "langfuse>=2.0.0,<3.0.0",
 
     # Utils
     "python-dotenv>=1.0.0",
@@ -97,7 +99,7 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v --cov=src --cov-report=term-missing --cov-fail-under=28"
+addopts = "-v --cov=src --cov-report=term-missing --cov-fail-under=60"
 
 [tool.bandit]
 exclude_dirs = ["tests"]

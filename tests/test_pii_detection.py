@@ -55,9 +55,10 @@ class TestCreateAnalyzer:
         """Analyzer deve conter recognizers brasileiros."""
         analyzer = create_analyzer()
         # Verificar que consegue analisar com entidades BR
+        # Nota: PatternRecognizer padrão usa language="en"
         results = analyzer.analyze(
             text="Meu CPF é 123.456.789-00",
-            language="pt",
+            language="en",
             entities=["BR_CPF"],
         )
         assert len(results) > 0

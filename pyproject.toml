@@ -99,7 +99,7 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v --cov=src --cov-report=term-missing --cov-fail-under=28"
+addopts = "-v --cov=src --cov-report=term-missing --cov-fail-under=60"
 
 [tool.bandit]
 exclude_dirs = ["tests"]

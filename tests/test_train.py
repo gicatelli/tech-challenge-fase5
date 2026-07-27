@@ -256,3 +256,352 @@ class TestTrainLSTM:
         assert "rmse" in metrics
         assert latency >= 0
         mock_train_model.assert_called_once()
+
+    @patch("src.models.train.train_lstm_model")
+    @patch("src.models.train.mlflow")
+    def test_lstm_default_config(self, mock_mlflow, mock_train_model):
+        """Deve usar valores padrão quando config parcial."""
+        from src.models.train import train_lstm
+
+        import torch
+
+        mock_run = MagicMock()
+        mock_run.info.run_id = "lstm-default"
+        mock_mlflow.start_run.return_value.__enter__ = MagicMock(return_value=mock_run)
+        mock_mlflow.start_run.return_value.__exit__ = MagicMock(return_value=False)
+
+        mock_model = MagicMock()
+        mock_model.eval = MagicMock()
+        mock_model.cpu = MagicMock(return_value=mock_model)
+        n_test = 10
+        mock_model.return_value = torch.FloatTensor(
+            np.random.uniform(0, 1, n_test).reshape(-1, 1)
+        )
+        mock_train_model.return_value = (mock_model, 0.02)
+
+        np.random.seed(42)
+        X_train = np.random.randn(50, 60, 5)
+        y_train = np.random.uniform(0, 1, 50)
+        X_test = np.random.randn(n_test, 60, 5)
+        y_test = np.random.uniform(0, 1, n_test)
+
+        # Config vazia — deve usar defaults
+        config = {}
+
+        run_id, metrics, latency = train_lstm(
+            X_train, y_train, X_test, y_test, config,
+            close_min=10.0, close_max=60.0,
+        )
+
+        assert run_id == "lstm-default"
+        assert metrics["mae"] >= 0
+        assert metrics["rmse"] >= 0
+
+
+class TestRunTrainingPipeline:
+    """Testes para run_training_pipeline com mocks."""
+
+    @patch("src.models.train.register_and_promote")
+    @patch("src.models.train.train_random_forest_regressor")
+    @patch("src.models.train.train_lstm")
+    @patch("src.models.train.mlflow")
+    @patch("src.models.train.compute_features")
+    @patch("src.models.train.prepare_sequences")
+    @patch("src.models.train.load_config")
+    @patch("pandas.read_csv")
+    def test_pipeline_returns_comparison(
+        self, mock_read_csv, mock_load_config, mock_prepare,
+        mock_features, mock_mlflow, mock_train_lstm, mock_train_rf,
+        mock_register,
+    ):
+        """Pipeline deve retornar dicionário com comparação."""
+        from src.models.train import run_training_pipeline
+
+        import pandas as pd
+
+        # Mock dados
+        n = 200
+        mock_df = pd.DataFrame({
+            "Open": np.random.uniform(30, 50, n),
+            "High": np.random.uniform(30, 50, n),
+            "Low": np.random.uniform(30, 50, n),
+            "Close": np.random.uniform(30, 50, n),
+            "Volume": np.random.randint(1000000, 5000000, n),
+        }, index=pd.date_range("2024-01-01", periods=n))
+        mock_read_csv.return_value = mock_df
+
+        # Mock config
+        mock_load_config.return_value = {
+            "lstm_optimized": {"sequence_length": 60},
+            "random_forest": {"n_estimators": 10},
+        }
+
+        # Mock features
+        features_df = pd.DataFrame(
+            np.random.randn(n, 10),
+            columns=[f"f{i}" for i in range(9)] + ["close"],
+            index=mock_df.index,
+        )
+        mock_features.return_value = features_df
+
+        # Mock sequences
+        X = np.random.randn(140, 60, 10).astype(np.float32)
+        y = np.random.uniform(0, 1, 140).astype(np.float32)
+        mock_prepare.return_value = (X, y)
+
+        # Mock MLflow
+        mock_mlflow.set_tracking_uri = MagicMock()
+        mock_mlflow.set_experiment = MagicMock()
+
+        # Mock training results
+        mock_train_lstm.return_value = (
+            "lstm-run-001",
+            {"mae": 3.5, "rmse": 5.5, "mape": 9.0, "r2": 0.30, "val_loss": 0.01},
+            0.5,
+        )
+        mock_train_rf.return_value = (
+            "rf-run-002",
+            {"mae": 4.0, "rmse": 6.2, "mape": 11.0, "r2": 0.15},
+            0.1,
+        )
+
+        # Mock registry
+        mock_register.return_value = "1"
+
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = run_training_pipeline(
+                data_path="fake.csv",
+                config_path="configs/model_config.yaml",
+                output_dir=tmpdir,
+            )
+
+        assert isinstance(result, dict)
+        assert "champion" in result
+        assert "lstm_run_id" in result
+        assert "rf_run_id" in result
+        assert result["champion"] == "lstm"
+
+    @patch("src.models.train.register_and_promote")
+    @patch("src.models.train.train_random_forest_regressor")
+    @patch("src.models.train.train_lstm")
+    @patch("src.models.train.mlflow")
+    @patch("src.models.train.compute_features")
+    @patch("src.models.train.prepare_sequences")
+    @patch("src.models.train.load_config")
+    @patch("pandas.read_csv")
+    def test_pipeline_rf_champion(
+        self, mock_read_csv, mock_load_config, mock_prepare,
+        mock_features, mock_mlflow, mock_train_lstm, mock_train_rf,
+        mock_register,
+    ):
+        """Pipeline deve selecionar RF como champion quando tem menor RMSE."""
+        from src.models.train import run_training_pipeline
+
+        import pandas as pd
+
+        n = 200
+        mock_df = pd.DataFrame({
+            "Open": np.random.uniform(30, 50, n),
+            "High": np.random.uniform(30, 50, n),
+            "Low": np.random.uniform(30, 50, n),
+            "Close": np.random.uniform(30, 50, n),
+            "Volume": np.random.randint(1000000, 5000000, n),
+        }, index=pd.date_range("2024-01-01", periods=n))
+        mock_read_csv.return_value = mock_df
+
+        mock_load_config.return_value = {
+            "lstm_optimized": {"sequence_length": 60},
+            "random_forest": {"n_estimators": 10},
+        }
+
+        features_df = pd.DataFrame(
+            np.random.randn(n, 10),
+            columns=[f"f{i}" for i in range(9)] + ["close"],
+            index=mock_df.index,
+        )
+        mock_features.return_value = features_df
+
+        X = np.random.randn(140, 60, 10).astype(np.float32)
+        y = np.random.uniform(0, 1, 140).astype(np.float32)
+        mock_prepare.return_value = (X, y)
+
+        mock_mlflow.set_tracking_uri = MagicMock()
+        mock_mlflow.set_experiment = MagicMock()
+
+        # RF wins
+        mock_train_lstm.return_value = (
+            "lstm-run-001",
+            {"mae": 5.0, "rmse": 7.5, "mape": 15.0, "r2": 0.10, "val_loss": 0.05},
+            0.5,
+        )
+        mock_train_rf.return_value = (
+            "rf-run-002",
+            {"mae": 3.0, "rmse": 5.0, "mape": 9.0, "r2": 0.35},
+            0.1,
+        )
+
+        mock_register.return_value = "2"
+
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = run_training_pipeline(
+                data_path="fake.csv",
+                config_path="configs/model_config.yaml",
+                output_dir=tmpdir,
+            )
+
+        assert result["champion"] == "random_forest"
+        assert result["rf_run_id"] == "rf-run-002"
+
+    @patch("src.models.train.register_and_promote")
+    @patch("src.models.train.train_random_forest_regressor")
+    @patch("src.models.train.train_lstm")
+    @patch("src.models.train.mlflow")
+    @patch("src.models.train.compute_features")
+    @patch("src.models.train.prepare_sequences")
+    @patch("src.models.train.load_config")
+    @patch("pandas.read_csv")
+    def test_pipeline_handles_registry_failure(
+        self, mock_read_csv, mock_load_config, mock_prepare,
+        mock_features, mock_mlflow, mock_train_lstm, mock_train_rf,
+        mock_register,
+    ):
+        """Pipeline deve continuar mesmo se registry falhar."""
+        from src.models.train import run_training_pipeline
+
+        import pandas as pd
+
+        n = 200
+        mock_df = pd.DataFrame({
+            "Open": np.random.uniform(30, 50, n),
+            "High": np.random.uniform(30, 50, n),
+            "Low": np.random.uniform(30, 50, n),
+            "Close": np.random.uniform(30, 50, n),
+            "Volume": np.random.randint(1000000, 5000000, n),
+        }, index=pd.date_range("2024-01-01", periods=n))
+        mock_read_csv.return_value = mock_df
+
+        mock_load_config.return_value = {
+            "lstm_optimized": {"sequence_length": 60},
+            "random_forest": {"n_estimators": 10},
+        }
+
+        features_df = pd.DataFrame(
+            np.random.randn(n, 10),
+            columns=[f"f{i}" for i in range(9)] + ["close"],
+            index=mock_df.index,
+        )
+        mock_features.return_value = features_df
+
+        X = np.random.randn(140, 60, 10).astype(np.float32)
+        y = np.random.uniform(0, 1, 140).astype(np.float32)
+        mock_prepare.return_value = (X, y)
+
+        mock_mlflow.set_tracking_uri = MagicMock()
+        mock_mlflow.set_experiment = MagicMock()
+
+        mock_train_lstm.return_value = (
+            "lstm-run-001",
+            {"mae": 3.5, "rmse": 5.5, "mape": 9.0, "r2": 0.30, "val_loss": 0.01},
+            0.5,
+        )
+        mock_train_rf.return_value = (
+            "rf-run-002",
+            {"mae": 4.0, "rmse": 6.2, "mape": 11.0, "r2": 0.15},
+            0.1,
+        )
+
+        # Registry falha
+        mock_register.side_effect = Exception("MLflow server offline")
+
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = run_training_pipeline(
+                data_path="fake.csv",
+                config_path="configs/model_config.yaml",
+                output_dir=tmpdir,
+            )
+
+        # Deve continuar e marcar como not_registered
+        assert result["registry_version"] == "not_registered"
+        assert result["champion"] == "lstm"
+
+    @patch("src.models.train.register_and_promote")
+    @patch("src.models.train.train_random_forest_regressor")
+    @patch("src.models.train.train_lstm")
+    @patch("src.models.train.mlflow")
+    @patch("src.models.train.compute_features")
+    @patch("src.models.train.prepare_sequences")
+    @patch("src.models.train.load_config")
+    @patch("pandas.read_csv")
+    def test_pipeline_saves_metrics_json(
+        self, mock_read_csv, mock_load_config, mock_prepare,
+        mock_features, mock_mlflow, mock_train_lstm, mock_train_rf,
+        mock_register,
+    ):
+        """Pipeline deve salvar métricas em JSON no output_dir."""
+        from src.models.train import run_training_pipeline
+
+        import pandas as pd
+        from pathlib import Path
+
+        n = 200
+        mock_df = pd.DataFrame({
+            "Open": np.random.uniform(30, 50, n),
+            "High": np.random.uniform(30, 50, n),
+            "Low": np.random.uniform(30, 50, n),
+            "Close": np.random.uniform(30, 50, n),
+            "Volume": np.random.randint(1000000, 5000000, n),
+        }, index=pd.date_range("2024-01-01", periods=n))
+        mock_read_csv.return_value = mock_df
+
+        mock_load_config.return_value = {
+            "lstm_optimized": {"sequence_length": 60},
+            "random_forest": {"n_estimators": 10},
+        }
+
+        features_df = pd.DataFrame(
+            np.random.randn(n, 10),
+            columns=[f"f{i}" for i in range(9)] + ["close"],
+            index=mock_df.index,
+        )
+        mock_features.return_value = features_df
+
+        X = np.random.randn(140, 60, 10).astype(np.float32)
+        y = np.random.uniform(0, 1, 140).astype(np.float32)
+        mock_prepare.return_value = (X, y)
+
+        mock_mlflow.set_tracking_uri = MagicMock()
+        mock_mlflow.set_experiment = MagicMock()
+
+        mock_train_lstm.return_value = (
+            "lstm-run-001",
+            {"mae": 3.5, "rmse": 5.5, "mape": 9.0, "r2": 0.30, "val_loss": 0.01},
+            0.5,
+        )
+        mock_train_rf.return_value = (
+            "rf-run-002",
+            {"mae": 4.0, "rmse": 6.2, "mape": 11.0, "r2": 0.15},
+            0.1,
+        )
+
+        mock_register.return_value = "1"
+
+        import tempfile
+        import json
+        with tempfile.TemporaryDirectory() as tmpdir:
+            run_training_pipeline(
+                data_path="fake.csv",
+                config_path="configs/model_config.yaml",
+                output_dir=tmpdir,
+            )
+
+            metrics_file = Path(tmpdir) / "train_metrics.json"
+            assert metrics_file.exists()
+
+            with open(metrics_file) as f:
+                saved = json.load(f)
+            assert "champion" in saved
+            assert "lstm" in saved
+            assert "random_forest" in saved

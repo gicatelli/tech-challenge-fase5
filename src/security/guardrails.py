@@ -108,7 +108,7 @@ class OutputGuardrail:
         (r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b", "<CPF_REDACTED>"),
         (r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", "<EMAIL_REDACTED>"),
         (r"\b\d{2}\s?\d{4,5}-?\d{4}\b", "<PHONE_REDACTED>"),
-        (r"\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b", "<CREDIT_CARD_REDACTED>"),
+        (r"\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}", "<CREDIT_CARD_REDACTED>"),
     ]
 
     def __init__(self, language: str = "pt"):
@@ -143,6 +143,8 @@ class OutputGuardrail:
         """Remove PII do output do LLM.
 
         Usa Presidio se disponível, caso contrário aplica regex patterns.
+        Sempre aplica regex como segunda camada para capturar cartões de crédito
+        e outros padrões que o Presidio pode não detectar em textos PT-BR.
 
         Args:
             llm_output: Texto gerado pelo LLM.
@@ -151,26 +153,26 @@ class OutputGuardrail:
             Texto sanitizado.
 
         """
+        sanitized = llm_output
+
         if self._use_presidio:
             try:
                 results = self.analyzer.analyze(
-                    text=llm_output,
+                    text=sanitized,
                     language="en",  # Presidio funciona melhor em inglês
                     entities=["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "CREDIT_CARD"],
                 )
                 if results:
                     logger.warning("PII detectado no output: %d entidades", len(results))
                     anonymized = self.anonymizer.anonymize(
-                        text=llm_output,
+                        text=sanitized,
                         analyzer_results=results,  # type: ignore[arg-type]
                     )
-                    return anonymized.text
-                return llm_output
+                    sanitized = anonymized.text
             except Exception as e:
                 logger.warning("Presidio falhou (%s), usando regex fallback", e)
 
-        # Fallback: regex-based PII detection
-        sanitized = llm_output
+        # Segunda camada: regex-based PII detection (captura cartões e padrões BR)
         pii_found = False
         for pattern, replacement in self._compiled_pii:
             if pattern.search(sanitized):

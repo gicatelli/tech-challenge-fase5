@@ -1,15 +1,19 @@
-"""RAG Pipeline — Embedding + Vector Store + Retriever + Generator.
+"""RAG Pipeline — Embedding + Vector Store + Retriever + Re-Ranking + Generator.
 
 Implementa o pipeline completo de Retrieval-Augmented Generation:
 1. Ingestão de documentos
-2. Chunking e embedding
+2. Chunking (500 chars) e embedding
 3. Armazenamento em vector store (ChromaDB)
-4. Retrieval por similaridade
-5. Geração de resposta com contexto
+4. Retrieval por similaridade (candidatos)
+5. Re-ranking com cross-encoder (precisão)
+6. Geração de resposta com contexto filtrado
 
 Suporta dois modos de embedding:
 - LOCAL (padrão): sentence-transformers (gratuito, offline)
 - OPENAI: OpenAI text-embedding-3-small (requer API key com créditos)
+
+Re-ranking com cross-encoder (ms-marco-MiniLM-L-6-v2) para melhorar
+context_precision filtrando chunks irrelevantes após retrieval inicial.
 """
 
 import logging
@@ -27,16 +31,21 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-# Configurações
-CHUNK_SIZE = 1000
-CHUNK_OVERLAP = 200
+# Configurações — chunks menores para maior precisão
+CHUNK_SIZE = 500
+CHUNK_OVERLAP = 100
 EMBEDDING_MODEL = "text-embedding-3-small"
 LOCAL_EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIRECTORY", "./data/chroma_db")
 KNOWLEDGE_BASE_DIR = os.getenv("KNOWLEDGE_BASE_DIR", "./data/knowledge_base")
 
 # Modo de embedding: "local" (sentence-transformers) ou "openai"
 EMBEDDING_MODE = os.getenv("EMBEDDING_MODE", "local").lower()
+
+# Re-ranking: buscar mais candidatos e filtrar com cross-encoder
+RETRIEVAL_CANDIDATES = 10  # Buscar 10 candidatos
+RERANK_TOP_K = 3  # Retornar top 3 após re-ranking
 
 
 def get_embeddings():
@@ -140,23 +149,89 @@ def get_vectorstore(collection_name: str = "datathon") -> Chroma:
 
 
 def retrieve_context(query: str, top_k: int = 3) -> list[str]:
-    """Recupera contextos relevantes para uma query.
+    """Recupera contextos relevantes com re-ranking por cross-encoder.
+
+    Pipeline de 2 estágios para melhorar context_precision:
+    1. Busca por similaridade: recupera RETRIEVAL_CANDIDATES candidatos
+    2. Re-ranking: cross-encoder pontua relevância e retorna top_k melhores
 
     Args:
         query: Pergunta do usuário.
-        top_k: Número de documentos a retornar.
+        top_k: Número de documentos a retornar após re-ranking.
 
     Returns:
-        Lista de textos relevantes.
+        Lista de textos relevantes (re-ranked).
 
     """
     vectorstore = get_vectorstore()
-    results = vectorstore.similarity_search(query, k=top_k)
 
-    contexts = [doc.page_content for doc in results]
-    logger.info("Retrieval: %d contextos para query '%s'", len(contexts), query[:50])
+    # Estágio 1: buscar mais candidatos por similaridade (recall alto)
+    n_candidates = max(RETRIEVAL_CANDIDATES, top_k * 3)
+    candidates = vectorstore.similarity_search(query, k=n_candidates)
+
+    if not candidates:
+        logger.warning("Nenhum candidato encontrado para query: %s", query[:50])
+        return []
+
+    # Estágio 2: re-ranking com cross-encoder (precision alto)
+    try:
+        reranked = _rerank_documents(query, candidates, top_k=top_k)
+        contexts = [doc.page_content for doc in reranked]
+        logger.info(
+            "Retrieval+Rerank: %d candidatos → %d contextos para '%s'",
+            len(candidates), len(contexts), query[:50],
+        )
+    except Exception as e:
+        # Fallback: sem re-ranking, usar top_k dos candidatos
+        logger.warning("Re-ranking falhou (%s), usando similaridade pura", e)
+        contexts = [doc.page_content for doc in candidates[:top_k]]
 
     return contexts
+
+
+def _rerank_documents(query: str, documents: list, top_k: int = 3) -> list:
+    """Re-rankeia documentos usando cross-encoder.
+
+    Cross-encoder avalia a relevância query-documento de forma mais precisa
+    que a similaridade de embeddings (bi-encoder), pois processa o par
+    (query, documento) junto.
+
+    Args:
+        query: Pergunta do usuário.
+        documents: Lista de documentos candidatos do ChromaDB.
+        top_k: Número de documentos a retornar.
+
+    Returns:
+        Lista de documentos re-rankeados (top_k mais relevantes).
+
+    """
+    from sentence_transformers import CrossEncoder
+
+    # Carregar cross-encoder (cached após primeira chamada)
+    reranker = CrossEncoder(RERANKER_MODEL)
+
+    # Preparar pares (query, documento) para scoring
+    pairs = [(query, doc.page_content) for doc in documents]
+
+    # Pontuar relevância
+    scores = reranker.predict(pairs)
+
+    # Ordenar por score decrescente e retornar top_k
+    scored_docs = sorted(
+        zip(scores, documents),
+        key=lambda x: x[0],
+        reverse=True,
+    )
+
+    reranked = [doc for _, doc in scored_docs[:top_k]]
+
+    logger.debug(
+        "Rerank scores: top=%.4f, bottom=%.4f",
+        scored_docs[0][0] if scored_docs else 0,
+        scored_docs[-1][0] if scored_docs else 0,
+    )
+
+    return reranked
 
 
 def generate_answer(query: str, contexts: list[str]) -> str:

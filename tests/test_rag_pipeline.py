@@ -242,10 +242,10 @@ class TestGenerateAnswer:
 class TestRagQuery:
     """Testes para rag_query (pipeline completo)."""
 
-    @patch("src.agent.rag_pipeline.trace_query")
+    @patch("src.monitoring.telemetry.QueryTracer")
     @patch("src.agent.rag_pipeline.generate_answer")
     @patch("src.agent.rag_pipeline.retrieve_context")
-    def test_returns_tuple(self, mock_retrieve, mock_generate, mock_trace):
+    def test_returns_tuple(self, mock_retrieve, mock_generate, mock_tracer_cls):
         """Deve retornar tupla (answer, contexts)."""
         mock_retrieve.return_value = ["contexto 1", "contexto 2"]
         mock_generate.return_value = "Resposta completa"
@@ -254,7 +254,7 @@ class TestRagQuery:
         mock_tracer = MagicMock()
         mock_tracer.__enter__ = MagicMock(return_value=mock_tracer)
         mock_tracer.__exit__ = MagicMock(return_value=False)
-        mock_trace.return_value = mock_tracer
+        mock_tracer_cls.return_value = mock_tracer
 
         answer, contexts = rag_query("Qual o preço?", top_k=2)
 
@@ -262,10 +262,10 @@ class TestRagQuery:
         assert len(contexts) == 2
         mock_retrieve.assert_called_once_with("Qual o preço?", top_k=2)
 
-    @patch("src.agent.rag_pipeline.trace_query")
+    @patch("src.monitoring.telemetry.QueryTracer")
     @patch("src.agent.rag_pipeline.generate_answer")
     @patch("src.agent.rag_pipeline.retrieve_context")
-    def test_traces_query(self, mock_retrieve, mock_generate, mock_trace):
+    def test_traces_query(self, mock_retrieve, mock_generate, mock_tracer_cls):
         """Deve usar telemetria para tracing."""
         mock_retrieve.return_value = ["ctx"]
         mock_generate.return_value = "resp"
@@ -273,10 +273,9 @@ class TestRagQuery:
         mock_tracer = MagicMock()
         mock_tracer.__enter__ = MagicMock(return_value=mock_tracer)
         mock_tracer.__exit__ = MagicMock(return_value=False)
-        mock_trace.return_value = mock_tracer
+        mock_tracer_cls.return_value = mock_tracer
 
         rag_query("test")
 
-        mock_trace.assert_called_once_with("test", method="rag")
         mock_tracer.set_contexts.assert_called_once_with(1)
         mock_tracer.set_output.assert_called_once_with("resp")

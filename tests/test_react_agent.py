@@ -126,7 +126,7 @@ class TestCreateDatathonAgent:
             "os.environ",
             {"USE_OLLAMA": "false", "OPENAI_API_KEY": "sk-test-key-123"},
         ):
-            agent = create_datathon_agent(tools=tools, max_iterations=5)
+            create_datathon_agent(tools=tools, max_iterations=5)
 
         # Verificar que AgentExecutor foi chamado com max_iterations=5
         mock_executor.assert_called_once()

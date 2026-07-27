@@ -261,9 +261,9 @@ class TestTrainLSTM:
     @patch("src.models.train.mlflow")
     def test_lstm_default_config(self, mock_mlflow, mock_train_model):
         """Deve usar valores padrão quando config parcial."""
-        from src.models.train import train_lstm
-
         import torch
+
+        from src.models.train import train_lstm
 
         mock_run = MagicMock()
         mock_run.info.run_id = "lstm-default"
@@ -542,8 +542,9 @@ class TestRunTrainingPipeline:
     ):
         """Pipeline deve salvar métricas em JSON no output_dir."""
         import json
-        import pandas as pd
         from pathlib import Path
+
+        import pandas as pd
 
         from src.models.train import run_training_pipeline
 

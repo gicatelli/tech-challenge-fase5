@@ -137,7 +137,7 @@ class TestCreateDatathonAgent:
 class TestRunAgent:
     """Testes para run_agent."""
 
-    @patch("src.agent.react_agent.trace_query")
+    @patch("src.monitoring.telemetry.trace_query")
     @patch("src.agent.react_agent.create_datathon_agent")
     def test_returns_answer_dict(self, mock_create_agent, mock_trace):
         """Deve retornar dicionário com answer, steps e tools_used."""
@@ -166,7 +166,7 @@ class TestRunAgent:
         assert result["steps"] == 1
         assert "calcular_risco" in result["tools_used"]
 
-    @patch("src.agent.react_agent.trace_query")
+    @patch("src.monitoring.telemetry.trace_query")
     @patch("src.agent.react_agent.get_available_tools")
     @patch("src.agent.react_agent.create_datathon_agent")
     def test_fallback_on_agent_failure(self, mock_create, mock_tools, mock_trace):
@@ -191,7 +191,7 @@ class TestRunAgent:
         assert "answer" in result
         assert "prever_preco" in result["tools_used"]
 
-    @patch("src.agent.react_agent.trace_query")
+    @patch("src.monitoring.telemetry.trace_query")
     @patch("src.agent.react_agent.get_available_tools")
     @patch("src.agent.react_agent.create_datathon_agent")
     def test_fallback_message_when_all_fails(self, mock_create, mock_tools, mock_trace):
@@ -216,7 +216,7 @@ class TestRunAgent:
             or "não foi possível" in result["answer"].lower()
         )
 
-    @patch("src.agent.react_agent.trace_query")
+    @patch("src.monitoring.telemetry.trace_query")
     def test_uses_provided_agent(self, mock_trace):
         """Deve usar agente fornecido se passado."""
         mock_tracer = MagicMock()

@@ -312,7 +312,7 @@ class TestSaveBestParams:
     def test_default_sequence_length(self, tmp_path):
         """Se sequence_length não fornecido, usa 60 como padrão."""
         output = tmp_path / "config.yaml"
-        output.write_text("")
+        output.write_text("---\n")
 
         params = {"hidden_size_1": 128, "hidden_size_2": 64, "num_layers": 2,
                   "dropout": 0.2, "learning_rate": 0.001, "batch_size": 32}

@@ -316,7 +316,10 @@ def compute_features(
             if not corr_features.empty:
                 for col in corr_features.columns:
                     result[col] = corr_features[col]
-                logger.info("Features de correlação adicionadas: %d colunas", len(corr_features.columns))
+                logger.info(
+                    "Features de correlação adicionadas: %d colunas",
+                    len(corr_features.columns),
+                )
         except Exception as e:
             logger.warning("Features de correlação não disponíveis: %s", e)
 

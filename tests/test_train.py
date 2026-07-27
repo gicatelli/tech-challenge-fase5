@@ -315,9 +315,9 @@ class TestRunTrainingPipeline:
         mock_register,
     ):
         """Pipeline deve retornar dicionário com comparação."""
-        from src.models.train import run_training_pipeline
-
         import pandas as pd
+
+        from src.models.train import run_training_pipeline
 
         # Mock dados
         n = 200
@@ -396,9 +396,9 @@ class TestRunTrainingPipeline:
         mock_register,
     ):
         """Pipeline deve selecionar RF como champion quando tem menor RMSE."""
-        from src.models.train import run_training_pipeline
-
         import pandas as pd
+
+        from src.models.train import run_training_pipeline
 
         n = 200
         mock_df = pd.DataFrame({
@@ -468,9 +468,9 @@ class TestRunTrainingPipeline:
         mock_register,
     ):
         """Pipeline deve continuar mesmo se registry falhar."""
-        from src.models.train import run_training_pipeline
-
         import pandas as pd
+
+        from src.models.train import run_training_pipeline
 
         n = 200
         mock_df = pd.DataFrame({
@@ -541,10 +541,11 @@ class TestRunTrainingPipeline:
         mock_register,
     ):
         """Pipeline deve salvar métricas em JSON no output_dir."""
-        from src.models.train import run_training_pipeline
-
+        import json
         import pandas as pd
         from pathlib import Path
+
+        from src.models.train import run_training_pipeline
 
         n = 200
         mock_df = pd.DataFrame({
@@ -589,7 +590,6 @@ class TestRunTrainingPipeline:
         mock_register.return_value = "1"
 
         import tempfile
-        import json
         with tempfile.TemporaryDirectory() as tmpdir:
             run_training_pipeline(
                 data_path="fake.csv",

@@ -337,10 +337,9 @@ class TestRunHyperparameterSearch:
         self, mock_read_csv, mock_prepare, mock_features, mock_mlflow, mock_optuna
     ):
         """Deve retornar dicionário com melhores parâmetros."""
-        from src.models.hyperparameter_tuning import run_hyperparameter_search
-
-        # Mock pandas read_csv
         import pandas as pd
+
+        from src.models.hyperparameter_tuning import run_hyperparameter_search
 
         mock_df = pd.DataFrame({
             "Close": np.random.uniform(30, 50, 200),
@@ -400,9 +399,9 @@ class TestRunHyperparameterSearch:
         self, mock_read_csv, mock_prepare, mock_features, mock_mlflow, mock_optuna
     ):
         """Deve chamar study.optimize com n_trials correto."""
-        from src.models.hyperparameter_tuning import run_hyperparameter_search
-
         import pandas as pd
+
+        from src.models.hyperparameter_tuning import run_hyperparameter_search
 
         mock_df = pd.DataFrame({
             "Close": np.random.uniform(30, 50, 200),

@@ -178,14 +178,15 @@ class TestRetrieveContext:
 
     @patch("src.agent.rag_pipeline.get_vectorstore")
     def test_respects_top_k(self, mock_get_vs):
-        """Deve respeitar parâmetro top_k."""
+        """Deve buscar mais candidatos que top_k para re-ranking."""
         mock_vs = MagicMock()
         mock_vs.similarity_search.return_value = []
         mock_get_vs.return_value = mock_vs
 
         retrieve_context("query", top_k=5)
 
-        mock_vs.similarity_search.assert_called_once_with("query", k=5)
+        # Com re-ranking, busca max(RETRIEVAL_CANDIDATES, top_k*3) candidatos
+        mock_vs.similarity_search.assert_called_once_with("query", k=15)
 
 
 class TestGenerateAnswer:

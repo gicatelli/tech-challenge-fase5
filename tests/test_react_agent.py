@@ -37,9 +37,10 @@ class TestReactPrompt:
 class TestCreateDatathonAgent:
     """Testes para create_datathon_agent."""
 
+    @patch("src.agent.react_agent.AgentExecutor")
     @patch("src.agent.react_agent.create_react_agent")
     @patch("src.agent.react_agent.get_available_tools")
-    def test_creates_agent_with_default_tools(self, mock_tools, mock_create):
+    def test_creates_agent_with_default_tools(self, mock_tools, mock_create, mock_executor):
         """Deve criar agente com tools padrão se nenhuma fornecida."""
         mock_tool_1 = MagicMock()
         mock_tool_1.name = "tool1"
@@ -49,6 +50,7 @@ class TestCreateDatathonAgent:
         mock_tool_3.name = "tool3"
         mock_tools.return_value = [mock_tool_1, mock_tool_2, mock_tool_3]
         mock_create.return_value = MagicMock()
+        mock_executor.return_value = MagicMock()
 
         with patch.dict(
             "os.environ",
@@ -59,12 +61,14 @@ class TestCreateDatathonAgent:
         assert agent is not None
         mock_tools.assert_called_once()
 
+    @patch("src.agent.react_agent.AgentExecutor")
     @patch("src.agent.react_agent.create_react_agent")
-    def test_warns_if_less_than_3_tools(self, mock_create):
+    def test_warns_if_less_than_3_tools(self, mock_create, mock_executor):
         """Deve emitir warning se menos de 3 tools."""
         mock_tool = MagicMock()
         mock_tool.name = "only_tool"
         mock_create.return_value = MagicMock()
+        mock_executor.return_value = MagicMock()
 
         with patch.dict(
             "os.environ",
@@ -107,13 +111,16 @@ class TestCreateDatathonAgent:
                     if val is not None:
                         os.environ[key] = val
 
+    @patch("src.agent.react_agent.AgentExecutor")
     @patch("src.agent.react_agent.create_react_agent")
-    def test_custom_max_iterations(self, mock_create):
+    def test_custom_max_iterations(self, mock_create, mock_executor):
         """Deve respeitar max_iterations configurado."""
         mock_tool = MagicMock()
         mock_tool.name = "t1"
         tools = [mock_tool, mock_tool, mock_tool]
         mock_create.return_value = MagicMock()
+        mock_executor_instance = MagicMock()
+        mock_executor.return_value = mock_executor_instance
 
         with patch.dict(
             "os.environ",
@@ -121,7 +128,10 @@ class TestCreateDatathonAgent:
         ):
             agent = create_datathon_agent(tools=tools, max_iterations=5)
 
-        assert agent.max_iterations == 5
+        # Verificar que AgentExecutor foi chamado com max_iterations=5
+        mock_executor.assert_called_once()
+        call_kwargs = mock_executor.call_args[1]
+        assert call_kwargs["max_iterations"] == 5
 
 
 class TestRunAgent:
